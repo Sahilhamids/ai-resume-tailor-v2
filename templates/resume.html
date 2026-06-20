@@ -10,7 +10,7 @@
         }
 
         body {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: "Times New Roman", Times, serif;
             font-size: 11pt;
             line-height: 1.3;
             color: #000;
@@ -61,38 +61,23 @@
 
         ul {
             margin-top: 2px;
-            margin-bottom: 2px;
             padding-left: 20px;
         }
 
         li {
             margin-bottom: 2px;
         }
-
-        a {
-            color: black;
-            text-decoration: none;
-        }
     </style>
 </head>
 
 <body>
     <h1>{{ name }}</h1>
-
-    <div class="contact">
-        {{ phone }} | {{ email }}<br>
-        {{ linkedin }} | {{ github }} | {{ portfolio }}
-    </div>
-
+    <div class="contact">{{ phone }} | {{ email }}<br>{{ linkedin }} | {{ github }} | {{ portfolio }}</div>
     <hr>
-
     <h2>Professional Summary</h2>
     <p>{{ summary }}</p>
-
     <hr>
-
     <h2>Technical Skills</h2>
-
     <ul>
         <li><strong>Languages:</strong> {{ skills.languages }}</li>
         <li><strong>Backend:</strong> {{ skills.backend }}</li>
@@ -101,77 +86,34 @@
         <li><strong>Core CS:</strong> {{ skills.core_cs }}</li>
         <li><strong>Tools:</strong> {{ skills.tools }}</li>
     </ul>
-
     <hr>
-
     <h2>Projects</h2>
-
     {% for proj in projects %}
     <div class="section-item">
-        <div class="header-row">
-            <span class="left">{{ proj.name }}</span>
-        </div>
+        <div class="header-row"><span class="left">{{ proj.name }}</span></div>
         <ul>
-            {% for bullet in proj.bullets %}
-            <li>{{ bullet }}</li>
-            {% endfor %}
+            {% for bullet in proj.bullets %}<li>{{ bullet }}</li>{% endfor %}
             <li><strong>Tech Stack:</strong> {{ proj.tech }}</li>
         </ul>
     </div>
     {% endfor %}
-
     <hr>
-
     <h2>Experience</h2>
-
     {% for job in experience %}
     <div class="section-item">
-        <div class="header-row">
-            <span class="left">{{ job.title }} | {{ job.company }}</span>
-            <span class="right">{{ job.dates }}</span>
-        </div>
-        <ul>
-            {% for bullet in job.bullets %}
-            <li>{{ bullet }}</li>
-            {% endfor %}
-        </ul>
+        <div class="header-row"><span class="left">{{ job.title }} | {{ job.company }}</span><span class="right">{{
+                job.dates }}</span></div>
+        <ul>{% for bullet in job.bullets %}<li>{{ bullet }}</li>{% endfor %}</ul>
     </div>
     {% endfor %}
-
     <hr>
-
-    <h2>Education</h2>
-
-    <div class="section-item">
-        <strong>{{ degree }}</strong><br>
-        {{ school }}<br>
-        {{ year }}
-    </div>
-
-    <hr>
-
     <h2>Achievements</h2>
-
-    <ul>
-        {% for achievement in achievements %}
-        <li>{{ achievement }}</li>
-        {% endfor %}
-    </ul>
-
+    <ul>{% for achievement in achievements %}<li>{{ achievement }}</li>{% endfor %}</ul>
     <hr>
-
     <h2>Certifications</h2>
-
-    <ul>
-        {% for cert in certifications %}
-        <li>{{ cert }}</li>
-        {% endfor %}
-    </ul>
-
+    <ul>{% for cert in certifications %}<li>{{ cert }}</li>{% endfor %}</ul>
     <hr>
-
     <h2>Languages</h2>
-
     <p>{{ languages }}</p>
 </body>
 
