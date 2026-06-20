@@ -11,7 +11,10 @@ with st.sidebar:
     st.header("Inputs")
     uploaded_file = st.file_uploader("Upload Resume (PDF)", type="pdf")
     job_description = st.text_area("Job Description", height=200)
-    role_level = st.selectbox("Target Role Level", ["Intern", "Junior", "Senior", "Staff"])
+    
+    # CHANGED: Now using text_input for full flexibility
+    role_level = st.text_input("Target Role", value="Software Engineer", help="Enter the exact job title you are applying for.")
+    
     submit = st.button("Run ATS Audit", type="primary")
 
 # Execution Logic
