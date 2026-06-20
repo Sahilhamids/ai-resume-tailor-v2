@@ -1,14 +1,4 @@
-# Ignore virtual environment
-venv/
-
-# Ignore Python cache files
-__pycache__/
-
-# Ignore local databases
-*.db
-resume_app.db
-
-# Ignore temporary files and dummy PDFs
-temp_*
-dummy_resume.pdf
 .env
+venv/
+__pycache__/
+.streamlit/secrets.toml

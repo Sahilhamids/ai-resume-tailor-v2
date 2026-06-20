@@ -1,32 +1,42 @@
 import streamlit as st
-import requests
-from pdf_generator import create_pdf_from_json
-import time
+from extractor import extract_text_from_pdf
+from ai_agent import analyze_resume
 
-st.set_page_config(page_title="AI Resume Tailor", page_icon="📄")
-st.title("📄 AI Resume Tailor")
+st.set_page_config(page_title="AI Resume Auditor", layout="wide")
+st.title("📊 AI Resume Auditor")
+st.markdown("Upload your resume and paste a Job Description to get an ATS-ready audit.")
 
-uploaded_file = st.file_uploader("Upload PDF", type="pdf")
-job_description = st.text_area("Job Description")
+# Input Section
+with st.sidebar:
+    st.header("Inputs")
+    uploaded_file = st.file_uploader("Upload Resume (PDF)", type="pdf")
+    job_description = st.text_area("Job Description", height=200)
+    role_level = st.selectbox("Target Role Level", ["Intern", "Junior", "Senior", "Staff"])
+    submit = st.button("Run ATS Audit", type="primary")
 
-if st.button("Tailor My Resume Now", type="primary"):
-    if uploaded_file and job_description:
-        with st.spinner("🤖 AI is analyzing..."):
-            files = {"resume_file": uploaded_file.getvalue()}
-            data = {"job_description": job_description}
-            try:
-                response = requests.post("https://ai-resume-tailor-znxi.onrender.com/tailor-resume", files=files, data=data)
-                if response.status_code == 200:
-                    ai_data = response.json().get("ai_analysis")
-                    if isinstance(ai_data, dict):
-                        st.success("Resume tailored!")
-                        st.info(ai_data.get("interview_guidance", "Guidance ready."))
-                        pdf_path = create_pdf_from_json(ai_data)
-                        with open(pdf_path, "rb") as f:
-                            st.download_button("Download PDF", f, "Tailored_Resume.pdf")
-                    else:
-                        st.error("🚨 Formatting hiccup. Try again.")
-                else:
-                    st.error("Backend Error.")
-            except Exception as e:
-                st.error(f"Connection Error: {e}")
+# Execution Logic
+if submit and uploaded_file and job_description:
+    with st.spinner("AI is analyzing your profile..."):
+        try:
+            resume_text = extract_text_from_pdf(uploaded_file.getvalue())
+            analysis = analyze_resume(resume_text, job_description, role_level)
+            
+            # Dashboard Display
+            st.metric("ATS Compatibility Score", f"{analysis['ats_score']}%")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.subheader("✅ Strengths")
+                for s in analysis['strengths']: st.write(f"• {s}")
+            with col2:
+                st.subheader("⚠️ Weaknesses")
+                for w in analysis['weaknesses']: st.write(f"• {w}")
+            
+            st.subheader("🎯 Missing Keywords")
+            st.info(", ".join(analysis['missing_keywords']))
+            
+            st.subheader("✍️ Paraphrasing Suggestions")
+            st.table(analysis['paraphrasing_suggestions'])
+            
+        except Exception as e:
+            st.error(f"Error: {e}")
