@@ -15,7 +15,7 @@ if st.button("Tailor My Resume Now", type="primary"):
             files = {"resume_file": uploaded_file.getvalue()}
             data = {"job_description": job_description}
             try:
-                response = requests.post("[https://ai-resume-tailor-znxi.onrender.com/tailor-resume](https://YOUR-RENDER-URL.onrender.com/tailor-resume)", files=files, data=data)
+                response = requests.post("https://ai-resume-tailor-znxi.onrender.com/tailor-resume", files=files, data=data)
                 if response.status_code == 200:
                     ai_data = response.json().get("ai_analysis")
                     if isinstance(ai_data, dict):
