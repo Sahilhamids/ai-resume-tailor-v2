@@ -9,11 +9,14 @@ def create_pdf_from_json(json_data, output_filename="tailored_resume.pdf"):
     template = env.get_template('resume.html')
     
     # 2. Safely map the JSON data into the HTML variables
+    # 2. Safely map the JSON data into the HTML variables
+    # 2. Safely map the JSON data into the HTML variables
     html_content = template.render(
         name=json_data.get("name", "Name Not Found"),
         email=json_data.get("email", ""),
         phone=json_data.get("phone", ""),
         linkedin=json_data.get("linkedin", ""),
+        # GitHub and LeetCode are now hardcoded in HTML, no need to get them here
         summary=json_data.get("summary", ""),
         skills=json_data.get("skills", ""),
         experience=json_data.get("experience", []),

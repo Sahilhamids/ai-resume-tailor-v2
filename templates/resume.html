@@ -3,98 +3,89 @@
 
 <head>
     <style>
+        /* Strict ATS-friendly CSS */
         @page {
             size: letter portrait;
             margin: 0.5in;
+            /* Forces margins to keep content tight */
         }
 
         body {
             font-family: "Times New Roman", Times, serif;
-            font-size: 11pt;
-            line-height: 1.15;
-            color: #000000;
-        }
-
-        .header {
-            text-align: center;
-            border-bottom: 1px solid #000;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-        }
-
-        .name {
-            font-size: 20pt;
-            font-weight: bold;
+            font-size: 10pt;
+            line-height: 1;
+            color: #000;
             margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 15pt;
+            text-align: center;
+            margin-bottom: 5px;
             text-transform: uppercase;
         }
 
         .contact-info {
+            text-align: center;
             font-size: 10pt;
-            margin-top: 5px;
+            margin-bottom: 15px;
         }
 
-        .contact-info a {
-            color: #000;
-            text-decoration: none;
-        }
-
-        .section-title {
-            font-size: 13pt;
-            font-weight: bold;
-            text-transform: uppercase;
+        h2 {
+            font-size: 12pt;
             border-bottom: 1px solid #000;
             margin-top: 10px;
             margin-bottom: 5px;
+            text-transform: uppercase;
         }
 
-        .item-header {
+        .job-header {
+            display: flex;
+            justify-content: space-between;
             font-weight: bold;
-            margin-top: 5px;
+            margin-top: 8px;
         }
 
-        .item-date {
-            float: right;
+        .date {
+            font-weight: normal;
             font-style: italic;
         }
 
-        .bullets {
+        ul {
             margin-top: 3px;
-            margin-bottom: 0;
             padding-left: 20px;
         }
 
-        .bullets li {
-            margin-bottom: 4px;
+        li {
+            margin-bottom: 3px;
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <p class="name">{{ name }}</p>
-        <p class="contact-info">
-            {{ email }} | {{ phone }} <br>
-            <a href="https://linkedin.com/in/YOUR-PROFILE">LinkedIn</a> |
-            <a href="https://github.com/Sahilhamids">GitHub</a> |
-            <a href="https://leetcode.com/YOUR-PROFILE">LeetCode</a>
-        </p>
+    <h1>{{ name }}</h1>
+    <div class="contact-info">
+        {{ email }} | {{ phone }} <br>
+        <a href="https://linkedin.com/in/your-profile-url">LinkedIn</a> |
+        <a href="https://github.com/Sahilhamids">GitHub</a> |
+        <a href="https://leetcode.com/u/your-leetcode-username/">LeetCode</a>
     </div>
 
-    <div class="section-title">Summary</div>
-    <p style="margin: 5px 0;">{{ summary }}</p>
+    <h2>Summary</h2>
+    <p>{{ summary }}</p>
 
-    <div class="section-title">Skills</div>
-    <p style="margin: 5px 0;">{{ skills }}</p>
+    <h2>Skills</h2>
+    <p>{{ skills }}</p>
 
-    <div class="section-title">Experience</div>
+    <h2>Experience</h2>
     {% for job in experience %}
     <div>
-        <div class="item-header">
-            {{ job.title }} <span style="font-weight: normal;">| {{ job.company }}</span>
-            <span class="item-date">{{ job.dates }}</span>
+        <div class="job-header">
+            <span>{{ job.title }} | {{ job.company }}</span>
+            <span class="date">{{ job.dates }}</span>
         </div>
-        <ul class="bullets">
+        <ul>
             {% for bullet in job.bullets %}
             <li>{{ bullet }}</li>
             {% endfor %}
@@ -102,13 +93,11 @@
     </div>
     {% endfor %}
 
-    <div class="section-title">Education</div>
+    <h2>Education</h2>
     {% for edu in education %}
     <div>
-        <div class="item-header">
-            {{ edu.degree }} <span style="font-weight: normal;">| {{ edu.school }}</span>
-            <span class="item-date">{{ edu.year }}</span>
-        </div>
+        <span style="font-weight: bold;">{{ edu.degree }}</span> | {{ edu.school }} <span class="date">{{ edu.year
+            }}</span>
     </div>
     {% endfor %}
 </body>
