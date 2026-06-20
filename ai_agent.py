@@ -55,19 +55,16 @@ def analyze_resume(resume_text, job_description, role_level):
     """
     
     # --- THE FALLBACK CASCADE ARCHITECTURE ---
+   # --- THE FALLBACK CASCADE ARCHITECTURE (DEBUG MODE) ---
     try:
-        print("Routing request to Primary Model: Gemini...")
         result_text = analyze_with_gemini(prompt)
         return json.loads(result_text)
         
-    except Exception as e:
-        print(f"⚠️ Gemini failed or quota exhausted: {e}")
-        print("🔄 Cascading to Fallback Model: Groq (Llama-3)...")
-        
+    except Exception as gemini_error:
         try:
             result_text = analyze_with_groq(prompt)
             return json.loads(result_text)
             
         except Exception as groq_error:
-            # If both fail, gracefully tell the user.
-            raise Exception("All AI servers are currently busy. Please try again in 1 minute.")
+            # THIS WILL SHOW US THE ACTUAL ERRORS:
+            raise Exception(f"DEBUG INFO -> Gemini failed because: [{gemini_error}] | Groq failed because: [{groq_error}]")
