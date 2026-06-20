@@ -2,85 +2,101 @@
 <html>
 
 <head>
-    <meta charset="UTF-8">
-    <title>Tailored Resume</title>
     <style>
-        /* Strict ATS-friendly CSS: Single column, standard fonts, no complex layouts */
-        body {
-            font-family: "Helvetica", "Arial", sans-serif;
-            font-size: 11pt;
-            line-height: 1.4;
-            color: #000;
-            margin: 0;
-            padding: 0;
+        @page {
+            size: letter portrait;
+            margin: 0.5in;
+            /* Strict half-inch margins to maximize space */
         }
 
-        h1 {
-            font-size: 20pt;
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 11pt;
+            /* Optimal size for 1-page fit */
+            line-height: 1.15;
+            color: #000000;
+        }
+
+        .header {
             text-align: center;
-            margin-bottom: 5px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .name {
+            font-size: 20pt;
+            font-weight: bold;
+            margin: 0;
             text-transform: uppercase;
         }
 
         .contact-info {
-            text-align: center;
             font-size: 10pt;
-            margin-bottom: 15px;
+            margin-top: 5px;
         }
 
-        h2 {
+        .contact-info a {
+            color: #000;
+            text-decoration: none;
+        }
+
+        .section-title {
             font-size: 13pt;
-            border-bottom: 1px solid #000;
-            padding-bottom: 2px;
-            margin-top: 15px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .job-title {
             font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #000;
+            margin-top: 10px;
+            margin-bottom: 5px;
         }
 
-        .company {
+        .item-header {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .item-date {
+            float: right;
             font-style: italic;
         }
 
-        .date {
-            float: right;
-            font-weight: normal;
-        }
-
-        ul {
-            margin-top: 5px;
+        .bullets {
+            margin-top: 3px;
+            margin-bottom: 0;
             padding-left: 20px;
         }
 
-        li {
-            margin-bottom: 5px;
+        .bullets li {
+            margin-bottom: 2px;
         }
     </style>
 </head>
 
 <body>
-    <h1>{{ name }}</h1>
-    <div class="contact-info">
-        {{ email }} | {{ phone }} | {{ linkedin }}
+    <div class="header">
+        <p class="name">{{ name }}</p>
+        <p class="contact-info">
+            {{ email }} | {{ phone }} <br>
+            <a href="{{ linkedin }}">LinkedIn</a> |
+            <a href="{{ github }}">GitHub</a> |
+            <a href="{{ leetcode }}">LeetCode</a>
+        </p>
     </div>
 
-    <h2>Professional Summary</h2>
-    <p>{{ summary }}</p>
+    <div class="section-title">Summary</div>
+    <p style="margin: 5px 0;">{{ summary }}</p>
 
-    <h2>Skills</h2>
-    <p>{{ skills }}</p>
+    <div class="section-title">Skills</div>
+    <p style="margin: 5px 0;">{{ skills }}</p>
 
-    <h2>Professional Experience</h2>
+    <div class="section-title">Experience</div>
     {% for job in experience %}
     <div>
-        <div style="margin-bottom: 3px;">
-            <span class="job-title">{{ job.title }}</span>, <span class="company">{{ job.company }}</span>
-            <span class="date">{{ job.dates }}</span>
+        <div class="item-header">
+            {{ job.title }} <span style="font-weight: normal;">| {{ job.company }}</span>
+            <span class="item-date">{{ job.dates }}</span>
         </div>
-        <ul>
+        <ul class="bullets">
             {% for bullet in job.bullets %}
             <li>{{ bullet }}</li>
             {% endfor %}
@@ -88,11 +104,13 @@
     </div>
     {% endfor %}
 
-    <h2>Education</h2>
+    <div class="section-title">Education</div>
     {% for edu in education %}
     <div>
-        <span class="job-title">{{ edu.degree }}</span>, <span class="company">{{ edu.school }}</span>
-        <span class="date">{{ edu.year }}</span>
+        <div class="item-header">
+            {{ edu.degree }} <span style="font-weight: normal;">| {{ edu.school }}</span>
+            <span class="item-date">{{ edu.year }}</span>
+        </div>
     </div>
     {% endfor %}
 </body>

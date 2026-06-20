@@ -10,10 +10,15 @@ client = genai.Client(api_key=API_KEY)
 
 def generate_tailored_resume(resume_text, job_description):
     # 2. Create the strict JSON prompt
+    # 2. Create the strict JSON prompt
     prompt = f"""
-    You are an expert resume writer. 
-    Compare the following Resume to the Job Description. 
-    Rewrite the resume to highlight matching skills. Do not invent experience.
+    You are an expert ATS resume writer. Compare the Resume to the Job Description and rewrite the resume to highlight matching skills. 
+    
+    STRICT 1-PAGE LIMITATIONS:
+    - Maximum 3 past experiences.
+    - Maximum 3 bullet points per experience.
+    - Maximum 15 words per bullet point.
+    - Extract all available links (GitHub, LeetCode, LinkedIn). If a link is missing, output "Not Provided".
     
     You MUST output your response strictly as a valid JSON object matching this exact structure:
     {{
@@ -21,8 +26,10 @@ def generate_tailored_resume(resume_text, job_description):
         "email": "email@example.com",
         "phone": "123-456-7890",
         "linkedin": "linkedin.com/in/profile",
-        "summary": "A brief professional summary highlighting matched skills.",
-        "skills": "Skill 1, Skill 2, Skill 3",
+        "github": "github.com/username",
+        "leetcode": "leetcode.com/username",
+        "summary": "A strictly 2-sentence professional summary highlighting matched skills.",
+        "skills": "Skill 1, Skill 2, Skill 3, Skill 4, Skill 5",
         "experience": [
             {{
                 "title": "Job Title",
@@ -49,9 +56,6 @@ def generate_tailored_resume(resume_text, job_description):
     
     JOB DESCRIPTION: 
     {job_description}
-    
-    Return ONLY the raw JSON format, without any formatting blocks like ```json or ```.
-    
     """
     
     try:
