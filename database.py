@@ -1,26 +1,39 @@
 import sqlite3
+import pandas as pd
+from datetime import datetime
+
+# Connect to (or create) the database file
+DB_NAME = "history.db"
 
 def init_db():
-    # 1. Connect to SQLite (this automatically creates a file named 'resume_app.db' if it doesn't exist)
-    conn = sqlite3.connect('resume_app.db')
+    """Creates the database table if it doesn't exist yet."""
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-
-    # 2. Write the SQL query to create a table for our generated resumes
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS generated_resumes (
+        CREATE TABLE IF NOT EXISTS audits (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            job_description TEXT,
-            filename TEXT,
-            ai_analysis TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            timestamp TEXT,
+            target_role TEXT,
+            score INTEGER
         )
     ''')
-
-    # 3. Save the changes and close the connection
     conn.commit()
     conn.close()
-    
-    print("Database and table successfully created!")
 
-if __name__ == "__main__":
-    init_db()
+def save_audit(target_role, score):
+    """Saves a new audit result to the database."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    cursor.execute("INSERT INTO audits (timestamp, target_role, score) VALUES (?, ?, ?)", 
+                   (timestamp, target_role, score))
+    conn.commit()
+    conn.close()
+
+def get_history_df():
+    """Fetches the history and returns it as a Pandas DataFrame for easy charting."""
+    conn = sqlite3.connect(DB_NAME)
+    df = pd.read_sql_query("SELECT timestamp, target_role, score FROM audits ORDER BY timestamp ASC", conn)
+    conn.close()
+    return df
