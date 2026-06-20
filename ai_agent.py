@@ -28,7 +28,7 @@ def analyze_with_groq(prompt):
     """Attempt 2: Meta Llama-3 via Groq API"""
     chat_completion = groq_client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
-        model="llama3-8b-8192", # Extremely fast, free model
+        model="llama-3.1-8b-instant", # Extremely fast, free model
         temperature=0.2,
         response_format={"type": "json_object"} # Forces valid JSON
     )
@@ -66,5 +66,6 @@ def analyze_resume(resume_text, job_description, role_level):
             return json.loads(result_text)
             
         except Exception as groq_error:
-            # THIS WILL SHOW US THE ACTUAL ERRORS:
+            # If both fail, gracefully tell the user.
+            raise Exception("All AI servers are currently busy. Please try again in 1 minute.")
             raise Exception(f"DEBUG INFO -> Gemini failed because: [{gemini_error}] | Groq failed because: [{groq_error}]")
