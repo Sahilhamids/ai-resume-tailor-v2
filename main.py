@@ -1,19 +1,14 @@
 import os
+import sqlite3
 from fastapi import FastAPI, UploadFile, File, Form
 from dotenv import load_dotenv
-from supabase import create_client, Client
 
 # Import your custom modules
 from extractor import extract_text_from_pdf
 from ai_agent import generate_tailored_resume
 
-# Load environment variables (API_KEY, SUPABASE_URL, SUPABASE_KEY)
+# Load environment variables
 load_dotenv()
-
-# Initialize Supabase client
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
 
 # Initialize FastAPI
 app = FastAPI(title="AI Resume Tailor API")
@@ -33,18 +28,34 @@ async def tailor_resume(
         # 3. Send to Gemini AI for analysis and JSON generation
         ai_data = generate_tailored_resume(resume_text, job_description)
         
-        # 4. Log user activity to Supabase Cloud Database
+        # 4. Log user activity to Local SQLite Database
         try:
-            # We extract the guidance safely in case the AI format breaks
             guidance = str(ai_data.get("interview_guidance", "No guidance")) if ai_data else "No guidance"
             
-            # Insert the record into your Supabase table
-            data, count = supabase.table('generated_resumes').insert({
-                "job_description": job_description,
-                "filename": resume_file.filename,
-                "guidance": guidance
-            }).execute()
-            print("Logged to Supabase cloud successfully!")
+            # Connect to local SQLite database
+            conn = sqlite3.connect('resume_app.db')
+            cursor = conn.cursor()
+            
+            # Safety Check: Recreate table if Render's free tier wiped the disk
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS Generated_Resumes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    job_description TEXT,
+                    filename TEXT,
+                    guidance TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            # Insert the record
+            cursor.execute('''
+                INSERT INTO Generated_Resumes (job_description, filename, guidance)
+                VALUES (?, ?, ?)
+            ''', (job_description, resume_file.filename, guidance))
+            
+            conn.commit()
+            conn.close()
+            print("Logged to local SQLite database successfully!")
             
         except Exception as db_error:
             print(f"Database logging error: {db_error}")
