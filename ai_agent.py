@@ -1,30 +1,73 @@
-import os
 import json
+import os
+import streamlit as st
 from google import genai
-from dotenv import load_dotenv
+from groq import Groq
 
-load_dotenv()
-client = genai.Client(api_key=os.getenv("API_KEY"))
+# Access API keys
+gemini_key = st.secrets.get("API_KEY") # Your existing Gemini key
+groq_key = st.secrets.get("GROQ_API_KEY") 
+
+# Initialize Clients
+gemini_client = genai.Client(api_key=gemini_key)
+groq_client = Groq(api_key=groq_key)
+
+def clean_json_string(text):
+    """Helper function to strip markdown from LLM outputs."""
+    return text.replace("```json", "").replace("```", "").strip()
+
+def analyze_with_gemini(prompt):
+    """Attempt 1: Google Gemini"""
+    response = gemini_client.models.generate_content(
+        model="gemini-2.5-flash", 
+        contents=prompt
+    )
+    return clean_json_string(response.text)
+
+def analyze_with_groq(prompt):
+    """Attempt 2: Meta Llama-3 via Groq API"""
+    chat_completion = groq_client.chat.completions.create(
+        messages=[{"role": "user", "content": prompt}],
+        model="llama3-8b-8192", # Extremely fast, free model
+        temperature=0.2,
+        response_format={"type": "json_object"} # Forces valid JSON
+    )
+    return chat_completion.choices[0].message.content
 
 def analyze_resume(resume_text, job_description, role_level):
     prompt = f"""
     Act as a professional Career Coach and ATS Expert.
-    Analyze the resume against the job description for a {role_level} position.
-    Output ONLY valid JSON.
+    Analyze the following resume against the job description for a {role_level} position.
     
+    Return ONLY a single valid JSON object with the following structure:
     {{
-        "ats_score": 75,
-        "strengths": ["List 3 strong points"],
-        "weaknesses": ["List 3 areas for improvement"],
-        "missing_keywords": ["List 5 missing industry keywords"],
+        "ats_score": 85,
+        "strengths": ["Point 1", "Point 2", "Point 3"],
+        "weaknesses": ["Point 1", "Point 2", "Point 3"],
+        "missing_keywords": ["Keyword1", "Keyword2", "Keyword3"],
         "paraphrasing_suggestions": [
-            {{"original": "Bad sentence", "suggested": "Strong, action-oriented sentence"}}
-        ],
-        "compliance_checklist": {{"has_images": bool, "has_columns": bool}}
+            {{"original": "Bad sentence", "suggested": "Strong version"}}
+        ]
     }}
+    
     RESUME: {resume_text}
-    JD: {job_description}
+    JOB DESCRIPTION: {job_description}
     """
-    response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
-    text = response.text.replace("```json", "").replace("```", "").strip()
-    return json.loads(text)
+    
+    # --- THE FALLBACK CASCADE ARCHITECTURE ---
+    try:
+        print("Routing request to Primary Model: Gemini...")
+        result_text = analyze_with_gemini(prompt)
+        return json.loads(result_text)
+        
+    except Exception as e:
+        print(f"⚠️ Gemini failed or quota exhausted: {e}")
+        print("🔄 Cascading to Fallback Model: Groq (Llama-3)...")
+        
+        try:
+            result_text = analyze_with_groq(prompt)
+            return json.loads(result_text)
+            
+        except Exception as groq_error:
+            # If both fail, gracefully tell the user.
+            raise Exception("All AI servers are currently busy. Please try again in 1 minute.")
