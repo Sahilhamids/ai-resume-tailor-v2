@@ -60,7 +60,7 @@ if st.button("✨ Tailor My Resume Now", type="primary", use_container_width=Tru
 
             try:
                 # IMPORTANT: Keep your specific Render URL here!
-                response = requests.post("https://ai-resume-tailor-znxi.onrender.com", files=files, data=data)
+                response = requests.post("https://ai-resume-tailor-znxi.onrender.com/tailor-resume", files=files, data=data)
                 
                 if response.status_code == 200:
                     st.write("✍️ Generating 1-page PDF layout...")
