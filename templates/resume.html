@@ -1,24 +1,26 @@
 <!DOCTYPE html>
+
 <html>
 
 <head>
+    <meta charset="UTF-8">
     <style>
         @page {
             size: letter portrait;
             margin: 0.5in;
         }
 
-        body {
-            font-family: "Times New Roman", Times, serif;
+        ``` body {
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 11pt;
-            line-height: 1.2;
+            line-height: 1.3;
             color: #000;
         }
 
         h1 {
             font-size: 20pt;
             text-align: center;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .contact {
@@ -27,78 +29,166 @@
             margin-bottom: 10px;
         }
 
+        hr {
+            border: 0;
+            border-top: 1px solid #000;
+            margin: 8px 0;
+        }
+
         h2 {
-            font-size: 14pt;
-            border-bottom: 1px solid #000;
-            margin-top: 15px;
-            margin-bottom: 5px;
+            font-size: 12pt;
+            text-transform: uppercase;
+            margin-top: 8px;
+            margin-bottom: 4px;
         }
 
-        /* Simple block layout, NO FLEXBOX */
-        .job-container {
-            margin-bottom: 10px;
+        .section-item {
+            margin-bottom: 8px;
         }
 
-        .job-header {
-            font-weight: bold;
+        .header-row {
             overflow: hidden;
+            font-weight: bold;
         }
 
-        .job-title {
+        .left {
             float: left;
         }
 
-        .job-date {
+        .right {
             float: right;
             font-style: italic;
         }
 
         ul {
-            margin-top: 3px;
+            margin-top: 2px;
+            margin-bottom: 2px;
             padding-left: 20px;
         }
 
         li {
-            margin-bottom: 3px;
+            margin-bottom: 2px;
+        }
+
+        a {
+            color: black;
+            text-decoration: none;
         }
     </style>
+    ```
+
 </head>
 
 <body>
+
+    ```
     <h1>{{ name }}</h1>
+
     <div class="contact">
-        {{ email }} | {{ phone }} <br>
-        <a href="https://github.com/Sahilhamids">GitHub</a> |
-        <a href="https://leetcode.com/u/sahilhamid/">LeetCode</a>
+        {{ phone }} | {{ email }}<br>
+        {{ linkedin }} |
+        {{ github }} |
+        {{ portfolio }}
     </div>
 
-    <h2>Summary</h2>
+    <hr>
+
+    <h2>Professional Summary</h2>
     <p>{{ summary }}</p>
 
-    <h2>Skills</h2>
-    <p>{{ skills }}</p>
+    <hr>
+
+    <h2>Technical Skills</h2>
+
+    <ul>
+        <li><strong>Languages:</strong> {{ skills.languages }}</li>
+        <li><strong>Backend:</strong> {{ skills.backend }}</li>
+        <li><strong>Database:</strong> {{ skills.database }}</li>
+        <li><strong>Frontend:</strong> {{ skills.frontend }}</li>
+        <li><strong>Core CS:</strong> {{ skills.core_cs }}</li>
+        <li><strong>Tools:</strong> {{ skills.tools }}</li>
+    </ul>
+
+    <hr>
+
+    <h2>Projects</h2>
+
+    {% for proj in projects %}
+    <div class="section-item">
+
+        <div class="header-row">
+            <span class="left">{{ proj.name }}</span>
+        </div>
+
+        <ul>
+            {% for bullet in proj.bullets %}
+            <li>{{ bullet }}</li>
+            {% endfor %}
+
+            <li><strong>Tech Stack:</strong> {{ proj.tech }}</li>
+        </ul>
+
+    </div>
+    {% endfor %}
+
+    <hr>
 
     <h2>Experience</h2>
+
     {% for job in experience %}
-    <div class="job-container">
-        <div class="job-header">
-            <span class="job-title">{{ job.title }} | {{ job.company }}</span>
-            <span class="job-date">{{ job.dates }}</span>
+    <div class="section-item">
+
+        <div class="header-row">
+            <span class="left">{{ job.title }} | {{ job.company }}</span>
+            <span class="right">{{ job.dates }}</span>
         </div>
+
         <ul>
             {% for bullet in job.bullets %}
             <li>{{ bullet }}</li>
             {% endfor %}
         </ul>
+
     </div>
     {% endfor %}
 
+    <hr>
+
     <h2>Education</h2>
-    {% for edu in education %}
-    <div>
-        <strong>{{ edu.degree }}</strong> | {{ edu.school }} ({{ edu.year }})
+
+    <div class="section-item">
+        <strong>{{ degree }}</strong><br>
+        {{ school }}<br>
+        {{ year }}
     </div>
-    {% endfor %}
+
+    <hr>
+
+    <h2>Achievements</h2>
+
+    <ul>
+        {% for achievement in achievements %}
+        <li>{{ achievement }}</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <h2>Certifications</h2>
+
+    <ul>
+        {% for cert in certifications %}
+        <li>{{ cert }}</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <h2>Languages</h2>
+
+    <p>{{ languages }}</p>
+    ```
+
 </body>
 
 </html>

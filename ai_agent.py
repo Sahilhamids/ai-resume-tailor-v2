@@ -1,94 +1,123 @@
 from google import genai
 from extractor import extract_text_from_pdf
-import json # <-- NEW: We need this to parse the AI's structured response
-import os #for importing key
+import json
+import os
 from dotenv import load_dotenv
-load_dotenv()
-API_KEY = os.getenv("API_KEY") # 1. Set up your API key
 
+# Load API Key
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
 client = genai.Client(api_key=API_KEY)
 
 def generate_tailored_resume(resume_text, job_description):
-    # 2. Create the strict JSON prompt
-    # 2. Create the strict JSON prompt
-    prompt = f"""
-    You are an expert ATS resume writer. Compare the Resume to the Job Description and rewrite the resume to highlight matching skills. 
-    
-    STRICT 1-PAGE LIMITATIONS:
-    - Maximum 3 past experiences.
-    - Maximum 3 bullet points per experience.
-    - Maximum 15 words per bullet point.
-    - Extract all available links (GitHub, LeetCode, LinkedIn). If a link is missing, output "Not Provided".
-    
-    You MUST output your response strictly as a valid JSON object matching this exact structure:
-    {{
-        "name": "Candidate Name",
-        "email": "email@example.com",
-        "phone": "123-456-7890",
-        "linkedin": "linkedin.com/in/profile",
-        "github": "github.com/username",
-        "leetcode": "leetcode.com/username",
-        "summary": "A strictly 2-sentence professional summary highlighting matched skills.",
-        "skills": "Skill 1, Skill 2, Skill 3, Skill 4, Skill 5",
-        "experience": [
-            {{
-                "title": "Job Title",
-                "company": "Company Name",
-                "dates": "Start Date - End Date",
-                "bullets": [
-                    "Tailored bullet point 1",
-                    "Tailored bullet point 2"
-                ]
-            }}
-        ],
-        "education": [
-            {{
-                "degree": "Degree Name",
-                "school": "School Name",
-                "year": "Graduation Year"
-            }}
-        ],
-        "interview_guidance": "List 3 critical missing skills and a 2-sentence guide on how to prepare."
-    }}
-
-    RESUME TEXT: 
-    {resume_text}
-    
-    JOB DESCRIPTION: 
-    {job_description}
+    """
+    Sends resume text and job description to Gemini to generate 
+    a structured JSON resume tailored for ATS optimization.
     """
     
+    prompt = f"""
+    You are an elite ATS Resume Optimization Expert and Senior Technical Recruiter.
+    Your goal is to optimize the candidate's resume for the provided Job Description while maintaining factual accuracy.
+
+    ===========================
+    RULES
+    - NEVER invent jobs, degrees, projects, certifications, dates, or companies.
+    - Preserve all factual information.
+    - Tailor: Professional Summary, Skills (Categorized), and Project Bullet Points.
+    - Use strong action verbs (Engineered, Developed, Optimized, etc.).
+    - Extract: Name, Phone, Email, LinkedIn, GitHub, Portfolio.
+    - If info is missing, use "Not Provided".
+    - Categorize Skills strictly into: languages, backend, database, frontend, core_cs, tools.
+    - Project bullets must be tailored to the JD, concise, and impact-oriented.
+    
+    ===========================
+    OUTPUT FORMAT (Strictly Valid JSON)
+    {{
+        "name": "...",
+        "phone": "...",
+        "email": "...",
+        "linkedin": "...",
+        "github": "...",
+        "portfolio": "...",
+        "summary": "...",
+        "skills": {{
+            "languages": "...",
+            "backend": "...",
+            "database": "...",
+            "frontend": "...",
+            "core_cs": "...",
+            "tools": "..."
+        }},
+        "projects": [
+            {{
+                "name": "...",
+                "tech": "...",
+                "bullets": ["...", "..."]
+            }}
+        ],
+        "experience": [
+            {{
+                "title": "...",
+                "company": "...",
+                "dates": "...",
+                "bullets": ["...", "..."]
+            }}
+        ],
+        "degree": "...",
+        "school": "...",
+        "year": "...",
+        "achievements": ["...", "..."],
+        "certifications": ["...", "..."],
+        "languages": "English, Hindi, Marathi, Urdu",
+        "interview_guidance": {{
+            "missing_skills": ["...", "..."],
+            "study_guide": "..."
+        }}
+    }}
+    ===========================
+    RESUME DATA
+    {resume_text}
+
+    ===========================
+    JOB DESCRIPTION
+    {job_description}
+    """
+
     try:
-        # 3. Send the prompt to Gemini
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model="gemini-2.5-flash",
             contents=prompt
         )
-        
-        # 4. Clean up the response just in case the AI adds formatting tags
+
         response_text = response.text.strip()
+
+        # Clean JSON markdown formatting
         if response_text.startswith("```json"):
             response_text = response_text[7:]
+        if response_text.startswith("```"):
+            response_text = response_text[3:]
         if response_text.endswith("```"):
             response_text = response_text[:-3]
-            
-        # 5. Convert the text into a real Python dictionary using the json library
-        return json.loads(response_text)
-        
+
+        return json.loads(response_text.strip())
+
     except Exception as e:
-        print(f"An error occurred with the AI: {e}")
+        print(f"AI Error: {e}")
         return None
 
-# Test the function
+# Local testing block
 if __name__ == "__main__":
     print("1. Extracting resume text...")
-    my_resume_text = extract_text_from_pdf("dummy_resume.pdf")
-    
-    dummy_jd = "We are looking for a Software Engineer with strong Python skills, experience in building APIs, and a solid understanding of SQL databases."
-    
-    print("2. Sending data to Gemini AI. This might take a few seconds...\n")
-    ai_response_dict = generate_tailored_resume(my_resume_text, dummy_jd)
-    
-    print("--- AI JSON RESPONSE ---")
-    # This prints the dictionary out beautifully formatted!
-    print(json.dumps(ai_response_dict, indent=4))
+    # Ensure a dummy_resume.pdf exists in the project root for local testing
+    resume_text = extract_text_from_pdf("dummy_resume.pdf")
+
+    job_description = "Looking for a Software Engineer with Python, FastAPI, and PostgreSQL experience."
+
+    print("2. Sending to Gemini...")
+    result = generate_tailored_resume(resume_text, job_description)
+
+    if result:
+        print("\n--- AI RESPONSE ---\n")
+        print(json.dumps(result, indent=4, ensure_ascii=False))
+    else:
+        print("AI generation failed.")
