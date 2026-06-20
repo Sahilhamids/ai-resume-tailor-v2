@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tailored Resume</title>
+    <style>
+        /* Strict ATS-friendly CSS: Single column, standard fonts, no complex layouts */
+        body {
+            font-family: "Helvetica", "Arial", sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #000;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 20pt;
+            text-align: center;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .contact-info {
+            text-align: center;
+            font-size: 10pt;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            font-size: 13pt;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .job-title {
+            font-weight: bold;
+        }
+
+        .company {
+            font-style: italic;
+        }
+
+        .date {
+            float: right;
+            font-weight: normal;
+        }
+
+        ul {
+            margin-top: 5px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>{{ name }}</h1>
+    <div class="contact-info">
+        {{ email }} | {{ phone }} | {{ linkedin }}
+    </div>
+
+    <h2>Professional Summary</h2>
+    <p>{{ summary }}</p>
+
+    <h2>Skills</h2>
+    <p>{{ skills }}</p>
+
+    <h2>Professional Experience</h2>
+    {% for job in experience %}
+    <div>
+        <div style="margin-bottom: 3px;">
+            <span class="job-title">{{ job.title }}</span>, <span class="company">{{ job.company }}</span>
+            <span class="date">{{ job.dates }}</span>
+        </div>
+        <ul>
+            {% for bullet in job.bullets %}
+            <li>{{ bullet }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+
+    <h2>Education</h2>
+    {% for edu in education %}
+    <div>
+        <span class="job-title">{{ edu.degree }}</span>, <span class="company">{{ edu.school }}</span>
+        <span class="date">{{ edu.year }}</span>
+    </div>
+    {% endfor %}
+</body>
+
+</html>
