@@ -3,52 +3,53 @@
 
 <head>
     <style>
-        /* Strict ATS-friendly CSS */
         @page {
             size: letter portrait;
             margin: 0.5in;
-            /* Forces margins to keep content tight */
         }
 
         body {
             font-family: "Times New Roman", Times, serif;
-            font-size: 10pt;
-            line-height: 1;
+            font-size: 11pt;
+            line-height: 1.2;
             color: #000;
-            margin: 0;
-            padding: 0;
         }
 
         h1 {
-            font-size: 15pt;
+            font-size: 20pt;
             text-align: center;
             margin-bottom: 5px;
-            text-transform: uppercase;
         }
 
-        .contact-info {
+        .contact {
             text-align: center;
             font-size: 10pt;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         h2 {
-            font-size: 12pt;
+            font-size: 14pt;
             border-bottom: 1px solid #000;
-            margin-top: 10px;
+            margin-top: 15px;
             margin-bottom: 5px;
-            text-transform: uppercase;
+        }
+
+        /* Simple block layout, NO FLEXBOX */
+        .job-container {
+            margin-bottom: 10px;
         }
 
         .job-header {
-            display: flex;
-            justify-content: space-between;
             font-weight: bold;
-            margin-top: 8px;
+            overflow: hidden;
         }
 
-        .date {
-            font-weight: normal;
+        .job-title {
+            float: left;
+        }
+
+        .job-date {
+            float: right;
             font-style: italic;
         }
 
@@ -65,9 +66,8 @@
 
 <body>
     <h1>{{ name }}</h1>
-    <div class="contact-info">
+    <div class="contact">
         {{ email }} | {{ phone }} <br>
-        <a href="https://linkedin.com/in/sahil-h-shaikh">LinkedIn</a> |
         <a href="https://github.com/Sahilhamids">GitHub</a> |
         <a href="https://leetcode.com/u/sahilhamid/">LeetCode</a>
     </div>
@@ -80,10 +80,10 @@
 
     <h2>Experience</h2>
     {% for job in experience %}
-    <div>
+    <div class="job-container">
         <div class="job-header">
-            <span>{{ job.title }} | {{ job.company }}</span>
-            <span class="date">{{ job.dates }}</span>
+            <span class="job-title">{{ job.title }} | {{ job.company }}</span>
+            <span class="job-date">{{ job.dates }}</span>
         </div>
         <ul>
             {% for bullet in job.bullets %}
@@ -96,8 +96,7 @@
     <h2>Education</h2>
     {% for edu in education %}
     <div>
-        <span style="font-weight: bold;">{{ edu.degree }}</span> | {{ edu.school }} <span class="date">{{ edu.year
-            }}</span>
+        <strong>{{ edu.degree }}</strong> | {{ edu.school }} ({{ edu.year }})
     </div>
     {% endfor %}
 </body>
