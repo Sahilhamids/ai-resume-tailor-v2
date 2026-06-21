@@ -19,7 +19,7 @@ from database import (
 init_db()
 
 # Page configuration
-st.set_page_config(page_title="RezLogix | Free AI ATS Resume Builder & Auditor", layout="wide")
+st.set_page_config(page_title="RezBuild | Free AI ATS Resume Builder & Auditor", layout="wide")
 
 # SEO Meta Tags
 st.markdown("""
