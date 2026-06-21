@@ -1,65 +1,89 @@
-AI Resume Tailor
-An intelligent, ATS-optimized resume tailoring application that automatically aligns a candidate's resume with a specific job description, ensuring maximum compatibility with Applicant Tracking Systems (ATS).
+🚀 Career Intelligence Platform (AI Resume SaaS)
 
-🚀 Live Demo
-[Link to your live Streamlit App URL]
+A full-stack, AI-powered Software-as-a-Service (SaaS) application designed to help job seekers beat the Applicant Tracking System (ATS).
 
-🛠 Tech Stack
-Frontend: Streamlit (Interactive UI)
+Unlike basic AI wrappers, this platform features secure user authentication, a persistent relational database for managing career profiles, and strict, hallucination-free LLM prompt engineering to generate factual, copy-paste-ready resume content tailored to specific Job Descriptions.
 
-Backend: FastAPI (REST API)
+Check it out here: https://ai-resume-tailor-v2.streamlit.app/
+✨ Key Features
 
-AI Engine: Google Gemini API (Text analysis & optimization)
+🔐 Secure Authentication & User State: Implemented bcrypt password hashing and Streamlit session state to create a secure, gated multi-user environment.
 
-PDF Engine: PyMuPDF (fitz) & xhtml2pdf
+💾 Persistent Relational Database: Engineered a full CRUD (Create, Read, Update, Delete) SQLite database to act as the user's "Master Profile," storing employment history, skills, projects, and custom sections securely.
 
-Database: SQLite (Project logging)
+🪄 AI Onboarding (Cold-Start Resolution): Users can upload an existing PDF resume, and the AI will extract, parse, and auto-populate the database using strict JSON schemas.
 
-Deployment: Render (Backend) & Streamlit Community Cloud (Frontend)
+⚡ Pipeline 1 (Dynamic Builder): Cross-references the user's factual database profile with a target Job Description to generate highly optimized, tailored resume bullets. Strict system prompts prevent AI hallucinations (inventing metrics or fake jobs).
 
-💡 Key Features
-Automated ATS Tailoring: Dynamically rewrites bullet points to match JD keywords while maintaining factual integrity.
+🔍 Pipeline 2 (ATS Auditor): Extracts and sanitizes text from uploaded PDFs, scores it against a Job Description, performs keyword gap analysis, and tracks the user's score progression over time via a historical database.
 
-Skill Gap Analysis: Identifies missing technical skills based on the JD to help users prepare for interviews.
+🔀 High-Availability LLM Architecture: Implemented an API fallback cascade. If the primary model (Google Gemini) fails or rate-limits, the system automatically seamlessly cascades to a secondary high-speed model (Llama-3.1 via Groq).
 
-One-Page Optimization: Enforces strict formatting and CSS constraints to ensure generated PDFs are ATS-friendly and perfectly sized.
+🎨 Modern UI/UX: Custom CSS injection overrides default Streamlit styling to provide a sleek, dark-mode SaaS aesthetic with glassmorphic containers, an animated gradient background, real-time weather, and visitor tracking widgets.
 
-Smart Extraction: Uses PyMuPDF to accurately extract text from complex, multi-column PDF layouts.
+🛠️ Tech Stack
 
-🏗 Project Architecture
-Extraction Phase: The raw PDF is converted into searchable text.
+Frontend: Streamlit, Custom CSS, HTML
 
-Analysis Phase: Gemini AI compares the extracted text against the Job Description and generates a structured JSON response.
+Backend: Python
 
-Tailoring Phase: The pdf_generator.py maps the structured JSON into an ATS-optimized HTML template.
+Database: SQLite3, Pandas (for data visualization)
 
-Rendering Phase: The HTML template is converted into a finalized, download-ready PDF.
+AI / LLMs: Google Gemini API (Primary), Groq API / Llama-3.1 (Fallback)
 
-🚀 How to Run Locally
-Clone the repository:
+Document Processing: PyMuPDF (fitz)
 
-Bash
-git clone https://github.com/Sahilhamids/ai-resume-tailor.git
-cd ai-resume-tailor
-Setup virtual environment:
+Security & Utilities: bcrypt, requests, datetime
 
-Bash
+🏗️ System Architecture
+
+app.py: The main routing engine and UI layer. Manages session state, authentication UI, global modern CSS, and multi-page navigation.
+
+database.py: Handles all SQLite connections, user creation, password verification, and complex CRUD operations for user profiles and audit histories.
+
+ai_agent.py: The AI engine. Manages API connections, fallback logic, and strict JSON-enforced prompt engineering.
+
+extractor.py & sanitizer.py: Text processing layer ensuring raw PDFs are cleaned of hidden characters and ligatures before being sent to the LLM context window.
+
+validator.py: A deterministic regex engine that double-checks the AI's keyword analysis to prevent "AI False Alarms."
+
+💻 Installation & Local Setup
+
+1. Clone the repository
+
+git clone [https://github.com/Sahilhamids/ai-resume-tailor-v2.git](https://github.com/yourusername/career-intelligence-platform.git)
+cd career-intelligence-platform
+
+
+2. Create a virtual environment and install dependencies
+
 python -m venv venv
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-Install dependencies:
-
-Bash
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 pip install -r requirements.txt
-Configure Environment:
-Create a .env file and add your Gemini API Key:
 
-Code snippet
-API_KEY=your_gemini_api_key_here
-Run the application:
 
-Terminal 1 (Backend): uvicorn main:app --reload
+3. Configure API Secrets
+Create a .streamlit folder in the root directory, and inside it, create a secrets.toml file. Add your API keys:
 
-Terminal 2 (Frontend): streamlit run app.py
+API_KEY = "your_google_gemini_key_here"
+GROQ_API_KEY = "your_groq_key_here"
+
+
+4. Run the application
+
+streamlit run app.py
+
+
+⚠️ Important Note on Deployment
+
+If deploying to Streamlit Community Cloud or Render, ensure you do not commit your .streamlit/secrets.toml file or your .db SQLite files. Use a .gitignore file to keep them private.
+
+📈 Future Roadmap
+
+Integration with a FastAPI backend for decoupling the UI.
+
+PDF generation (exporting the tailored text directly into a formatted PDF layout).
+
+LinkedIn URL scraping to auto-populate the master profile without a PDF.
+
+Developed by SAHIL SHAIKH

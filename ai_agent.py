@@ -69,3 +69,110 @@ def analyze_resume(resume_text, job_description, role_level):
             # If both fail, gracefully tell the user.
             raise Exception("All AI servers are currently busy. Please try again in 1 minute.")
             raise Exception(f"DEBUG INFO -> Gemini failed because: [{gemini_error}] | Groq failed because: [{groq_error}]")
+
+# --- ADD THIS TO THE BOTTOM OF ai_agent.py ---
+
+def generate_tailored_resume(profile_data, job_description):
+    """
+    Pipeline 1 Engine: Takes raw profile data and a JD, and generates
+    strict, tailored resume content without hallucinating.
+    """
+    prompt = f"""
+    Act as an Expert Executive Resume Writer and ATS Specialist.
+    Your task is to generate highly tailored, ATS-friendly resume sections based STRICTLY on the user's provided profile data and the target Job Description.
+
+    STRICT ANTI-HALLUCINATION RULES:
+    1. DO NOT invent or fabricate any metrics, percentages, companies, degrees, or skills that are not explicitly stated in the User Profile Data.
+    2. You may rephrase, reformat, and reorganize the user's existing experience to highlight relevance to the Job Description, but you must remain factual.
+    3. If the user lacks a critical skill mentioned in the JD, DO NOT add it to their resume.
+
+    Return ONLY a valid JSON object with this exact structure:
+    {{
+        "professional_summary": "A 3-4 sentence powerful summary tailored to the JD.",
+        "tailored_employment": [
+            {{
+                "company": "Company Name",
+                "title": "Role Title",
+                "duration": "Start - End",
+                "optimized_bullets": ["Bullet 1", "Bullet 2", "Bullet 3"]
+            }}
+        ],
+        "tailored_projects": [
+            {{
+                "name": "Project Name",
+                "optimized_description": "A tailored 2-3 sentence description focusing on relevant tech/skills."
+            }}
+        ],
+        "top_relevant_skills": ["Skill 1", "Skill 2", "Skill 3"]
+    }}
+
+    USER PROFILE DATA:
+    {profile_data}
+
+    TARGET JOB DESCRIPTION:
+    {job_description}
+    """
+    
+    # --- THE FALLBACK CASCADE ARCHITECTURE ---
+    try:
+        print("Routing generation request to Primary Model: Gemini...")
+        result_text = analyze_with_gemini(prompt)
+        return json.loads(result_text)
+        
+    except Exception as e:
+        print(f"⚠️ Gemini failed: {e}. Cascading to Groq (Llama-3.1)...")
+        try:
+            result_text = analyze_with_groq(prompt)
+            return json.loads(result_text)
+            
+        except Exception as groq_error:
+            raise Exception("All AI servers are currently busy. Please try again in 1 minute.")
+def parse_resume_to_profile(resume_text):
+    """
+    Reads a raw resume and extracts the data into a structured JSON format 
+    that perfectly matches our database schema.
+    """
+    prompt = f"""
+    Act as an Expert Data Extraction AI. Extract the candidate's professional profile from the following resume text.
+    Return ONLY a single valid JSON object. Do not invent any data. If a field is missing, return an empty string "" or an empty list [].
+
+    Expected JSON Structure:
+    {{
+        "basic_info": {{
+            "full_name": "John Doe",
+            "phone": "123-456-7890",
+            "linkedin_url": "linkedin.com/in/...",
+            "github_url": "github.com/...",
+            "target_role": "Software Engineer"
+        }},
+        "skills": ["Python", "React", "AWS"],
+        "employment": [
+            {{
+                "company": "Tech Corp",
+                "title": "Backend Engineer",
+                "start_date": "01/2020",
+                "end_date": "Present",
+                "responsibilities": "Maintained servers..."
+            }}
+        ],
+        "projects": [
+            {{
+                "name": "E-Commerce App",
+                "description": "Built using Next.js...",
+                "link": "github.com/repo"
+            }}
+        ]
+    }}
+
+    RESUME TEXT:
+    {resume_text}
+    """
+    
+    try:
+        result_text = analyze_with_gemini(prompt)
+        import json # Ensure json is imported at the top of your file!
+        return json.loads(result_text)
+    except Exception as e:
+        print(f"Gemini failed, falling back to Groq: {e}")
+        result_text = analyze_with_groq(prompt)
+        return json.loads(result_text)
