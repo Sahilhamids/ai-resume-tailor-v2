@@ -19,8 +19,15 @@ from database import (
 init_db()
 
 # Page configuration
-st.set_page_config(page_title="Career Intelligence Platform", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="RezLogix | Free AI ATS Resume Builder & Auditor", layout="wide")
 
+# SEO Meta Tags
+st.markdown("""
+    <head>
+        <meta name="description" content="Use RezLogix to instantly polish your resume for free. Our AI-powered tool ensures your resume is ATS-compliant, highlights your skills, and is tailored to any job description. No hallucinations, just factual optimization.">
+        <meta name="keywords" content="free resume builder, ATS resume checker, AI resume polisher, resume tailoring tool, developer resume">
+    </head>
+""", unsafe_allow_html=True)
 # --- MODERN UI & ANIMATED BACKGROUND CSS INJECTION ---
 st.markdown("""
     <style>
@@ -141,11 +148,11 @@ else:
     with st.sidebar:
         st.title("🧭 Navigation")
         
-        # This radio button dictates what page is shown in the main workspace
         page = st.radio("Go to:", [
             "🏠 Dashboard (My Profile)", 
             "⚡ Build Resume (Pipeline 1)", 
-            "🔍 Audit PDF (Pipeline 2)"
+            "🔍 Audit PDF (Pipeline 2)",
+            "📚 Career Insights" # <--- ADD THIS LINE
         ])
 
     # ==========================================
@@ -494,7 +501,36 @@ else:
             st.warning("👈 Please upload a PDF resume to begin.")
         elif not job_description:
             st.warning("👈 Please paste a Job Description in the sidebar to begin.")
-
+    # ==========================================
+    # PAGE 4: CAREER INSIGHTS (The SEO Door)
+    # ==========================================
+    elif page == "📚 Career Insights":
+        st.title("📚 Career Insights & ATS Tips")
+        st.write("Expert advice to help you land your next role.")
+        
+        st.divider()
+        
+        # Article 1
+        with st.expander("💡 How to pass ATS scanners", expanded=True):
+            st.markdown("""
+            To pass an ATS (Applicant Tracking System), follow these three rules:
+            1. **Keyword Matching:** Ensure your resume contains specific keywords found in the job description.
+            2. **Standard Formatting:** Use standard headers (Experience, Education) and avoid complex graphics that confuse parsers.
+            3. **Consistent Dates:** Use a clear date format like MM/YYYY.
+            """)
+            
+        # Article 2
+        with st.expander("🚀 Top 5 Skills for SDE Roles in 2026"):
+            st.markdown("""
+            1. **Python & Cloud Infrastructure (AWS)**
+            2. **System Design at Scale**
+            3. **Data Structures & Algorithms**
+            4. **CI/CD Pipeline Automation**
+            5. **Effective Technical Communication**
+            """)
+            
+        st.divider()
+        st.info("💡 **Pro-Tip:** Use our '🔍 Audit PDF' tool after reading these tips to see your optimized ATS score!")
 
     # ==========================================
     # GLOBAL FOOTER (Displays at the bottom of EVERY authenticated page)
