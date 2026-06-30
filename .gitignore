@@ -7,3 +7,4 @@ __pycache__/
 *.docx
 frontend/node_modules/
 static_dist/
+STUDY_GUIDE.md

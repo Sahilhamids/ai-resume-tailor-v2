@@ -2,7 +2,7 @@
 
 > Living status doc for picking up this project in a new chat session. Update this whenever significant work lands.
 
-See also: [`STUDY_GUIDE.md`](STUDY_GUIDE.md) — a full end-to-end interview-prep explainer of every concept used in this project (FastAPI, JWT, SQLAlchemy, LLM fallback architecture, React, Docker, etc.), written so the user can defend this project on a resume/interview and rebuild something similar from scratch.
+See also: `STUDY_GUIDE.md` in this same local folder (gitignored, NOT in the public repo on purpose — it's personal interview-prep material) — a full end-to-end explainer of every concept used in this project, written so the user can defend it in an interview and rebuild something similar from scratch.
 
 ## Where things live
 
