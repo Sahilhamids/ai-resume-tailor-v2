@@ -52,9 +52,23 @@ export default function Dashboard() {
 
   if (!profile) return <ErrorBanner message={error} />;
 
+  const isFirstTime = !profile.full_name && profile.skills.length === 0 && profile.employment.length === 0 && profile.projects.length === 0;
+
   return (
     <div>
       <ErrorBanner message={error} />
+
+      {isFirstTime && (
+        <div className="card" style={{ borderLeft: "4px solid #6366f1" }}>
+          <h3>Welcome 👋</h3>
+          <p className="muted">
+            No account needed — your profile and history are saved to this browser automatically.
+            Get started by uploading an existing resume below (AI auto-fills everything), or fill in
+            your basic info manually. Once your profile has at least one skill or job, head to
+            <b> Build Resume</b> to generate a tailored version for a specific job posting.
+          </p>
+        </div>
+      )}
 
       <div className="card">
         <h3>AI Onboarding</h3>

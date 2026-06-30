@@ -130,12 +130,108 @@ export async function buildResume(jobDescription) {
   });
 }
 
-export async function exportPdf(tailoredResume) {
+export async function getResumeTemplates() {
+  return api("/resume/templates");
+}
+
+export async function previewResume(tailoredResume, template) {
+  return api("/resume/preview", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tailored_resume: tailoredResume, template }),
+  }).then((res) => res.text());
+}
+
+export async function exportPdf(tailoredResume, template) {
   return api("/resume/export-pdf", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(tailoredResume),
+    body: JSON.stringify({ tailored_resume: tailoredResume, template }),
   });
+}
+
+export async function exportDocx(tailoredResume, template) {
+  return api("/resume/export-docx", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tailored_resume: tailoredResume, template }),
+  });
+}
+
+export async function saveResume(title, jobDescription, template, result) {
+  return api("/resume/saved", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, job_description: jobDescription, template, result }),
+  });
+}
+
+export async function listSavedResumes() {
+  return api("/resume/saved");
+}
+
+export async function getSavedResume(id) {
+  return api(`/resume/saved/${id}`);
+}
+
+export async function deleteSavedResume(id) {
+  return api(`/resume/saved/${id}`, { method: "DELETE" });
+}
+
+export async function generateCoverLetter(jobDescription, companyName) {
+  return api("/cover-letter/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ job_description: jobDescription, company_name: companyName }),
+  });
+}
+
+export async function saveCoverLetter(title, companyName, content, savedResumeId) {
+  return api("/cover-letter/saved", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, company_name: companyName, content, saved_resume_id: savedResumeId }),
+  });
+}
+
+export async function listCoverLetters() {
+  return api("/cover-letter/saved");
+}
+
+export async function deleteCoverLetter(id) {
+  return api(`/cover-letter/saved/${id}`, { method: "DELETE" });
+}
+
+export async function createJobApplication(data) {
+  return api("/jobs", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function listJobApplications() {
+  return api("/jobs");
+}
+
+export async function updateJobStatus(id, status) {
+  return api(`/jobs/${id}/status`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function updateJobApplication(id, data) {
+  return api(`/jobs/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteJobApplication(id) {
+  return api(`/jobs/${id}`, { method: "DELETE" });
 }
 
 export async function auditResume(file, jobDescription, role) {

@@ -177,3 +177,39 @@ def parse_resume_to_profile(resume_text):
         print(f"Gemini failed, falling back to Groq: {e}")
         result_text = analyze_with_groq(prompt)
         return json.loads(result_text)
+
+
+def generate_cover_letter(profile_data, job_description, company_name):
+    """
+    Generates a tailored cover letter strictly from the user's factual profile data,
+    following the same anti-hallucination rules as the resume builder.
+    """
+    prompt = f"""
+    Act as an Expert Career Coach writing a compelling, concise cover letter.
+    Use STRICTLY the facts in the User Profile Data below — do not invent
+    metrics, companies, or skills not present there. Address the letter to
+    "{company_name}" if provided, otherwise keep it generic ("Hiring Team").
+
+    Return ONLY a valid JSON object with this exact structure:
+    {{
+        "subject_line": "A short, punchy subject/title for the letter",
+        "body": "The full cover letter body text, 3-4 paragraphs, ready to send."
+    }}
+
+    USER PROFILE DATA:
+    {profile_data}
+
+    TARGET JOB DESCRIPTION:
+    {job_description}
+    """
+
+    try:
+        result_text = analyze_with_gemini(prompt)
+        return json.loads(result_text)
+    except Exception as e:
+        print(f"Gemini failed: {e}. Cascading to Groq (Llama-3.1)...")
+        try:
+            result_text = analyze_with_groq(prompt)
+            return json.loads(result_text)
+        except Exception:
+            raise Exception("All AI servers are currently busy. Please try again in 1 minute.")

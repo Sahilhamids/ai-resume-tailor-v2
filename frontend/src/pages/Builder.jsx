@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as api from "../api";
 import ErrorBanner from "../components/ErrorBanner";
 
@@ -8,10 +8,32 @@ export default function Builder() {
   const [error, setError] = useState("");
   const [isBuilding, setIsBuilding] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [templates, setTemplates] = useState(["modern", "classic", "minimal"]);
+  const [template, setTemplate] = useState("modern");
+  const [previewHtml, setPreviewHtml] = useState("");
+  const [saveTitle, setSaveTitle] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [savedResumes, setSavedResumes] = useState([]);
+
+  function loadSavedResumes() {
+    api.listSavedResumes().then(setSavedResumes).catch((e) => setError(e.message));
+  }
+
+  useEffect(() => {
+    api.getResumeTemplates().then((r) => setTemplates(r.templates)).catch(() => {});
+    loadSavedResumes();
+  }, []);
+
+  useEffect(() => {
+    if (!result) return;
+    api.previewResume(result, template).then(setPreviewHtml).catch((e) => setError(e.message));
+  }, [result, template]);
 
   async function handleBuild() {
     if (!jd.trim()) return setError("Paste a job description first.");
     setIsBuilding(true);
+    setSaved(false);
     try {
       const r = await api.buildResume(jd);
       setResult(r);
@@ -23,21 +45,59 @@ export default function Builder() {
     }
   }
 
-  async function handleExport() {
+  async function handleExport(format) {
     if (!result) return setError("Generate a resume first.");
     setIsExporting(true);
     try {
-      const res = await api.exportPdf(result);
+      const res = format === "pdf" ? await api.exportPdf(result, template) : await api.exportDocx(result, template);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "tailored_resume.pdf";
+      a.download = `tailored_resume.${format}`;
       a.click();
     } catch (e) {
       setError(e.message);
     } finally {
       setIsExporting(false);
+    }
+  }
+
+  async function handleSave() {
+    if (!result) return setError("Generate a resume first.");
+    if (!saveTitle.trim()) return setError("Give this resume version a name first.");
+    setIsSaving(true);
+    try {
+      await api.saveResume(saveTitle, jd, template, result);
+      setSaved(true);
+      setError("");
+      loadSavedResumes();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleLoadSaved(id) {
+    try {
+      const r = await api.getSavedResume(id);
+      setResult(r.result);
+      setJd(r.job_description || "");
+      setTemplate(r.template || "modern");
+      setSaved(true);
+      setError("");
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function handleDeleteSaved(id) {
+    try {
+      await api.deleteSavedResume(id);
+      loadSavedResumes();
+    } catch (e) {
+      setError(e.message);
     }
   }
 
@@ -55,30 +115,51 @@ export default function Builder() {
       {result && (
         <div className="card">
           <h3>Result</h3>
-          <h4>Professional Summary</h4>
-          <p>{result.professional_summary}</p>
 
-          <h4>Tailored Employment</h4>
-          {(result.tailored_employment || []).map((j, i) => (
-            <div key={i}>
-              <p><b>{j.title}</b> @ {j.company} ({j.duration})</p>
-              <ul>{(j.optimized_bullets || []).map((b, bi) => <li key={bi}>{b}</li>)}</ul>
-            </div>
-          ))}
+          <label className="muted">Template</label>
+          <select value={template} onChange={(e) => setTemplate(e.target.value)}>
+            {templates.map((t) => <option key={t} value={t}>{t[0].toUpperCase() + t.slice(1)}</option>)}
+          </select>
 
-          <h4>Tailored Projects</h4>
-          {(result.tailored_projects || []).map((p, i) => (
-            <p key={i}><b>{p.name}</b>: {p.optimized_description}</p>
-          ))}
+          {previewHtml && (
+            <iframe
+              title="Resume preview"
+              srcDoc={previewHtml}
+              style={{ width: "100%", height: "600px", border: "1px solid #334155", borderRadius: "8px", marginTop: "10px", background: "#fff" }}
+            />
+          )}
 
-          <h4>Top Relevant Skills</h4>
-          <p>{(result.top_relevant_skills || []).join(", ")}</p>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: "12px" }}>
+            <button onClick={() => handleExport("pdf")} disabled={isExporting}>
+              {isExporting ? "Exporting…" : "Export as PDF"}
+            </button>
+            <button onClick={() => handleExport("docx")} disabled={isExporting} className="secondary">
+              {isExporting ? "Exporting…" : "Export as Word (.docx)"}
+            </button>
+          </div>
 
-          <button onClick={handleExport} disabled={isExporting}>
-            {isExporting ? "Exporting…" : "Export as PDF"}
-          </button>
+          <div style={{ marginTop: "12px" }}>
+            <input placeholder="Name this resume version (e.g. 'Acme Corp - Backend SDE')" value={saveTitle} onChange={(e) => setSaveTitle(e.target.value)} />
+            <button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? "Saving…" : saved ? "Saved ✓" : "Save This Version"}
+            </button>
+          </div>
         </div>
       )}
+
+      <div className="card">
+        <h3>Saved Versions</h3>
+        {savedResumes.length === 0 && <p className="muted">No saved resume versions yet.</p>}
+        {savedResumes.map((r) => (
+          <div className="row" key={r.id}>
+            <span>{r.title} <span className="muted">({r.template}, {new Date(r.created_at).toLocaleDateString()})</span></span>
+            <span>
+              <button className="secondary" onClick={() => handleLoadSaved(r.id)}>Load</button>{" "}
+              <button className="danger" onClick={() => handleDeleteSaved(r.id)}>Delete</button>
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

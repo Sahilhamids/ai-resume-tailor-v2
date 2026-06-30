@@ -31,6 +31,9 @@ class User(Base):
     projects = relationship("Project", back_populates="user", cascade="all, delete-orphan")
     custom_sections = relationship("CustomSection", back_populates="user", cascade="all, delete-orphan")
     audits = relationship("Audit", back_populates="user", cascade="all, delete-orphan")
+    saved_resumes = relationship("SavedResume", back_populates="user", cascade="all, delete-orphan")
+    cover_letters = relationship("CoverLetter", back_populates="user", cascade="all, delete-orphan")
+    job_applications = relationship("JobApplication", back_populates="user", cascade="all, delete-orphan")
 
 
 class Profile(Base):
@@ -103,6 +106,61 @@ class CustomSection(Base):
     content = Column(Text, nullable=False)
 
     user = relationship("User", back_populates="custom_sections")
+
+
+class SavedResume(Base):
+    __tablename__ = "saved_resumes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String, nullable=False)
+    job_description = Column(Text)
+    template = Column(String, default="modern")
+    result_json = Column(Text, nullable=False)
+    created_at = Column(DateTime, nullable=False)
+
+    user = relationship("User", back_populates="saved_resumes")
+    job_applications = relationship("JobApplication", back_populates="saved_resume")
+
+
+class CoverLetter(Base):
+    __tablename__ = "cover_letters"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    saved_resume_id = Column(Integer, ForeignKey("saved_resumes.id", ondelete="SET NULL"), nullable=True)
+    title = Column(String, nullable=False)
+    company_name = Column(String)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, nullable=False)
+
+    user = relationship("User", back_populates="cover_letters")
+
+
+class JobApplication(Base):
+    __tablename__ = "job_applications"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    saved_resume_id = Column(Integer, ForeignKey("saved_resumes.id", ondelete="SET NULL"), nullable=True)
+    company = Column(String, nullable=False)
+    role = Column(String, nullable=False)
+    status = Column(String, nullable=False, default="applied")
+    notes = Column(Text)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
+
+    user = relationship("User", back_populates="job_applications")
+    saved_resume = relationship("SavedResume", back_populates="job_applications")
+
+
+class UsageEvent(Base):
+    __tablename__ = "usage_events"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    event_name = Column(String, nullable=False)
+    timestamp = Column(DateTime, nullable=False)
 
 
 def init_db():

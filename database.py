@@ -1,7 +1,10 @@
 import bcrypt
 from datetime import datetime
 
-from db import get_session, User, Profile, EmploymentHistory, Skill, Project, CustomSection, Audit
+from db import (
+    get_session, User, Profile, EmploymentHistory, Skill, Project, CustomSection, Audit,
+    SavedResume, CoverLetter, JobApplication, UsageEvent,
+)
 
 # --- AUTHENTICATION LOGIC ---
 
@@ -257,5 +260,199 @@ def delete_skill(skill_id):
     try:
         session.query(Skill).filter(Skill.id == skill_id).delete()
         session.commit()
+    finally:
+        session.close()
+
+
+# --- SAVED RESUMES CRUD ---
+
+def save_resume(user_id, title, job_description, template, result_json):
+    session = get_session()
+    try:
+        r = SavedResume(
+            user_id=user_id, title=title, job_description=job_description,
+            template=template, result_json=result_json, created_at=datetime.utcnow(),
+        )
+        session.add(r)
+        session.commit()
+        return r.id
+    finally:
+        session.close()
+
+
+def get_saved_resumes(user_id):
+    session = get_session()
+    try:
+        rows = (
+            session.query(SavedResume)
+            .filter(SavedResume.user_id == user_id)
+            .order_by(SavedResume.created_at.desc())
+            .all()
+        )
+        return [
+            {"id": r.id, "title": r.title, "job_description": r.job_description,
+             "template": r.template, "created_at": r.created_at.isoformat()}
+            for r in rows
+        ]
+    finally:
+        session.close()
+
+
+def get_saved_resume(resume_id):
+    session = get_session()
+    try:
+        r = session.query(SavedResume).filter(SavedResume.id == resume_id).first()
+        if not r:
+            return None
+        return {
+            "id": r.id, "title": r.title, "job_description": r.job_description,
+            "template": r.template, "result_json": r.result_json, "created_at": r.created_at.isoformat(),
+        }
+    finally:
+        session.close()
+
+
+def delete_saved_resume(resume_id):
+    session = get_session()
+    try:
+        session.query(SavedResume).filter(SavedResume.id == resume_id).delete()
+        session.commit()
+    finally:
+        session.close()
+
+
+# --- COVER LETTERS CRUD ---
+
+def save_cover_letter(user_id, title, company_name, content, saved_resume_id=None):
+    session = get_session()
+    try:
+        c = CoverLetter(
+            user_id=user_id, title=title, company_name=company_name, content=content,
+            saved_resume_id=saved_resume_id, created_at=datetime.utcnow(),
+        )
+        session.add(c)
+        session.commit()
+        return c.id
+    finally:
+        session.close()
+
+
+def get_cover_letters(user_id):
+    session = get_session()
+    try:
+        rows = (
+            session.query(CoverLetter)
+            .filter(CoverLetter.user_id == user_id)
+            .order_by(CoverLetter.created_at.desc())
+            .all()
+        )
+        return [
+            {"id": c.id, "title": c.title, "company_name": c.company_name,
+             "content": c.content, "created_at": c.created_at.isoformat()}
+            for c in rows
+        ]
+    finally:
+        session.close()
+
+
+def delete_cover_letter(cover_letter_id):
+    session = get_session()
+    try:
+        session.query(CoverLetter).filter(CoverLetter.id == cover_letter_id).delete()
+        session.commit()
+    finally:
+        session.close()
+
+
+# --- JOB APPLICATION TRACKER CRUD ---
+
+def add_job_application(user_id, company, role, status="applied", notes="", saved_resume_id=None):
+    session = get_session()
+    try:
+        now = datetime.utcnow()
+        j = JobApplication(
+            user_id=user_id, company=company, role=role, status=status, notes=notes,
+            saved_resume_id=saved_resume_id, created_at=now, updated_at=now,
+        )
+        session.add(j)
+        session.commit()
+        return j.id
+    finally:
+        session.close()
+
+
+def get_job_applications(user_id):
+    session = get_session()
+    try:
+        rows = (
+            session.query(JobApplication)
+            .filter(JobApplication.user_id == user_id)
+            .order_by(JobApplication.updated_at.desc())
+            .all()
+        )
+        return [
+            {"id": j.id, "company": j.company, "role": j.role, "status": j.status,
+             "notes": j.notes, "saved_resume_id": j.saved_resume_id,
+             "created_at": j.created_at.isoformat(), "updated_at": j.updated_at.isoformat()}
+            for j in rows
+        ]
+    finally:
+        session.close()
+
+
+def update_job_application_status(application_id, status):
+    session = get_session()
+    try:
+        session.query(JobApplication).filter(JobApplication.id == application_id).update({
+            "status": status,
+            "updated_at": datetime.utcnow(),
+        })
+        session.commit()
+    finally:
+        session.close()
+
+
+def update_job_application(application_id, company, role, notes):
+    session = get_session()
+    try:
+        session.query(JobApplication).filter(JobApplication.id == application_id).update({
+            "company": company,
+            "role": role,
+            "notes": notes,
+            "updated_at": datetime.utcnow(),
+        })
+        session.commit()
+    finally:
+        session.close()
+
+
+def delete_job_application(application_id):
+    session = get_session()
+    try:
+        session.query(JobApplication).filter(JobApplication.id == application_id).delete()
+        session.commit()
+    finally:
+        session.close()
+
+
+# --- USAGE ANALYTICS ---
+
+def log_event(user_id, event_name):
+    session = get_session()
+    try:
+        session.add(UsageEvent(user_id=user_id, event_name=event_name, timestamp=datetime.utcnow()))
+        session.commit()
+    finally:
+        session.close()
+
+
+def get_event_counts():
+    session = get_session()
+    try:
+        rows = session.query(UsageEvent.event_name, UsageEvent.id).all()
+        counts = {}
+        for name, _ in rows:
+            counts[name] = counts.get(name, 0) + 1
+        return counts
     finally:
         session.close()

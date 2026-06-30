@@ -72,49 +72,29 @@
 
 <body>
     <h1>{{ name }}</h1>
-    <div class="contact">{{ phone }} | {{ email }}<br>{{ linkedin }} | {{ github }} | {{ portfolio }}</div>
+    <div class="contact">{{ phone }} | {{ email }}<br>{{ linkedin }} | {{ github }}</div>
     <hr>
     <h2>Professional Summary</h2>
     <p>{{ summary }}</p>
     <hr>
-    <h2>Technical Skills</h2>
-    <ul>
-        <li><strong>Languages:</strong> {{ skills.languages }}</li>
-        <li><strong>Backend:</strong> {{ skills.backend }}</li>
-        <li><strong>Database:</strong> {{ skills.database }}</li>
-        <li><strong>Frontend:</strong> {{ skills.frontend }}</li>
-        <li><strong>Core CS:</strong> {{ skills.core_cs }}</li>
-        <li><strong>Tools:</strong> {{ skills.tools }}</li>
-    </ul>
+    <h2>Top Skills</h2>
+    <p>{{ skills | join(", ") }}</p>
+    <hr>
+    <h2>Experience</h2>
+    {% for job in experience %}
+    <div class="section-item">
+        <div class="header-row"><span class="left">{{ job.title }} | {{ job.company }}</span><span class="right">{{ job.duration }}</span></div>
+        <ul>{% for bullet in job.bullets %}<li>{{ bullet }}</li>{% endfor %}</ul>
+    </div>
+    {% endfor %}
     <hr>
     <h2>Projects</h2>
     {% for proj in projects %}
     <div class="section-item">
         <div class="header-row"><span class="left">{{ proj.name }}</span></div>
-        <ul>
-            {% for bullet in proj.bullets %}<li>{{ bullet }}</li>{% endfor %}
-            <li><strong>Tech Stack:</strong> {{ proj.tech }}</li>
-        </ul>
+        <p>{{ proj.description }}</p>
     </div>
     {% endfor %}
-    <hr>
-    <h2>Experience</h2>
-    {% for job in experience %}
-    <div class="section-item">
-        <div class="header-row"><span class="left">{{ job.title }} | {{ job.company }}</span><span class="right">{{
-                job.dates }}</span></div>
-        <ul>{% for bullet in job.bullets %}<li>{{ bullet }}</li>{% endfor %}</ul>
-    </div>
-    {% endfor %}
-    <hr>
-    <h2>Achievements</h2>
-    <ul>{% for achievement in achievements %}<li>{{ achievement }}</li>{% endfor %}</ul>
-    <hr>
-    <h2>Certifications</h2>
-    <ul>{% for cert in certifications %}<li>{{ cert }}</li>{% endfor %}</ul>
-    <hr>
-    <h2>Languages</h2>
-    <p>{{ languages }}</p>
 </body>
 
 </html>

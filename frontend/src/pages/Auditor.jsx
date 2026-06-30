@@ -11,6 +11,7 @@ export default function Auditor() {
   const [history, setHistory] = useState([]);
   const [error, setError] = useState("");
   const [isAuditing, setIsAuditing] = useState(false);
+  const [previousScore, setPreviousScore] = useState(null);
 
   async function loadHistory() {
     try {
@@ -27,6 +28,8 @@ export default function Auditor() {
       return setError("File, role, and job description are all required.");
     }
     setIsAuditing(true);
+    const priorForRole = [...history].reverse().find((h) => h.target_role === role);
+    setPreviousScore(priorForRole ? priorForRole.score : null);
     try {
       const r = await api.auditResume(file, jd, role);
       setResult(r);
@@ -56,7 +59,19 @@ export default function Auditor() {
       {result && (
         <div className="card">
           <h3>Audit Result</h3>
-          <div className="score">{result.analysis.ats_score}/100</div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "16px" }}>
+            <div className="score">{result.analysis.ats_score}/100</div>
+            {previousScore !== null && (
+              <span className={result.analysis.ats_score >= previousScore ? "muted" : "muted"} style={{
+                color: result.analysis.ats_score > previousScore ? "#22c55e" : result.analysis.ats_score < previousScore ? "#ef4444" : "#94a3b8",
+                fontWeight: "bold",
+              }}>
+                {result.analysis.ats_score > previousScore && "▲ "}
+                {result.analysis.ats_score < previousScore && "▼ "}
+                {result.analysis.ats_score === previousScore ? "No change" : `${Math.abs(result.analysis.ats_score - previousScore)} pts vs last audit for this role (${previousScore})`}
+              </span>
+            )}
+          </div>
           <h4>Strengths</h4>
           <ul>{(result.analysis.strengths || []).map((s, i) => <li key={i}>{s}</li>)}</ul>
           <h4>Weaknesses</h4>
