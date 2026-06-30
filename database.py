@@ -41,6 +41,47 @@ def verify_login(email, password):
         session.close()
 
 
+def get_user_email(user_id):
+    session = get_session()
+    try:
+        user = session.query(User).filter(User.id == user_id).first()
+        return user.email if user else None
+    finally:
+        session.close()
+
+
+def set_user_credentials(user_id, email, password):
+    """Links a real email/password to an existing (typically anonymous) user, so
+    they can log back in from another device. Returns False if the email is taken."""
+    session = get_session()
+    try:
+        existing = session.query(User).filter(User.email == email, User.id != user_id).first()
+        if existing:
+            return False
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+        session.query(User).filter(User.id == user_id).update({
+            "email": email,
+            "password_hash": hashed.decode("utf-8"),
+        })
+        session.commit()
+        return True
+    except Exception:
+        session.rollback()
+        return False
+    finally:
+        session.close()
+
+
+def delete_user(user_id):
+    session = get_session()
+    try:
+        session.query(User).filter(User.id == user_id).delete()
+        session.commit()
+    finally:
+        session.close()
+
+
 # --- PROFILE & DATA CRUD OPERATIONS ---
 
 def get_profile(user_id):

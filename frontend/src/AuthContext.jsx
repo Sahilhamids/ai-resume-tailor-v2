@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
-import { getToken, setToken, clearToken, createAnonymousSession } from "./api";
+import { getToken, setToken, clearToken, createAnonymousSession, login as apiLogin } from "./api";
 
 const AuthContext = createContext(null);
 
@@ -37,8 +37,13 @@ export function AuthProvider({ children }) {
     await bootstrapSession();
   }, [bootstrapSession]);
 
+  const login = useCallback(async (email, password) => {
+    const data = await apiLogin(email, password);
+    setToken(data.access_token);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ isReady, error, resetSession }}>
+    <AuthContext.Provider value={{ isReady, error, resetSession, login }}>
       {children}
     </AuthContext.Provider>
   );

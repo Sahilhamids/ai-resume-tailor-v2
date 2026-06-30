@@ -56,6 +56,22 @@ export async function login(email, password) {
   return api("/auth/login", { method: "POST", body: form });
 }
 
+export async function getAccountStatus() {
+  return api("/auth/me");
+}
+
+export async function linkAccount(email, password) {
+  return api("/auth/link-account", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function deleteAccount() {
+  return api("/account", { method: "DELETE" });
+}
+
 export async function getProfile() {
   return api("/profile");
 }

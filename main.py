@@ -42,6 +42,11 @@ class SignupRequest(BaseModel):
     password: str
 
 
+class LinkAccountRequest(BaseModel):
+    email: str
+    password: str
+
+
 class ProfileUpdateRequest(BaseModel):
     full_name: str = ""
     phone: str = ""
@@ -190,6 +195,31 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     token = create_access_token(user_id)
     return {"access_token": token, "token_type": "bearer"}
+
+
+@app.get("/auth/me")
+def get_account_status(user_id: int = Depends(get_current_user_id)):
+    email = database.get_user_email(user_id)
+    is_anonymous = bool(email) and email.startswith("anon-") and email.endswith("@anon.local")
+    return {"email": None if is_anonymous else email, "is_anonymous": is_anonymous}
+
+
+@app.post("/auth/link-account")
+def link_account(data: LinkAccountRequest, user_id: int = Depends(get_current_user_id)):
+    """Attaches a real email/password to the current (usually anonymous) session,
+    so the same profile/history can be logged into from another device."""
+    ok = database.set_user_credentials(user_id, data.email, data.password)
+    if not ok:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    return {"status": "ok"}
+
+
+@app.delete("/account")
+def delete_account(user_id: int = Depends(get_current_user_id)):
+    """Permanently deletes the account and all associated data (profile, resumes,
+    cover letters, job applications, audit history) via cascading foreign keys."""
+    database.delete_user(user_id)
+    return {"status": "ok"}
 
 
 # --- Profile ---
