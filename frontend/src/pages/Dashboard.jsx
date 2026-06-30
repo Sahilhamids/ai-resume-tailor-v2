@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [newSkill, setNewSkill] = useState("");
   const [emp, setEmp] = useState({ company: "", role: "", start_date: "", end_date: "", responsibilities: "" });
   const [proj, setProj] = useState({ name: "", description: "", link: "" });
+  const [isOnboarding, setIsOnboarding] = useState(false);
 
   async function loadProfile() {
     try {
@@ -40,7 +41,13 @@ export default function Dashboard() {
   async function onboardFromPdf(e) {
     const file = e.target.files[0];
     if (!file) return;
-    await handleAction(() => api.onboardFromPdf(file));
+    setIsOnboarding(true);
+    try {
+      await handleAction(() => api.onboardFromPdf(file));
+    } finally {
+      setIsOnboarding(false);
+      e.target.value = "";
+    }
   }
 
   if (!profile) return <ErrorBanner message={error} />;
@@ -52,7 +59,8 @@ export default function Dashboard() {
       <div className="card">
         <h3>AI Onboarding</h3>
         <p className="muted">Upload an existing resume PDF to auto-fill your profile.</p>
-        <input type="file" accept=".pdf" onChange={onboardFromPdf} />
+        <input type="file" accept=".pdf" onChange={onboardFromPdf} disabled={isOnboarding} />
+        {isOnboarding && <p className="muted">Extracting and filling your profile…</p>}
       </div>
 
       <div className="card">

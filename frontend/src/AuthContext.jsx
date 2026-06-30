@@ -1,30 +1,44 @@
-import { createContext, useContext, useState, useCallback } from "react";
-import { getToken, setToken, clearToken, signup as apiSignup, login as apiLogin } from "./api";
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
+import { getToken, setToken, clearToken, createAnonymousSession } from "./api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!getToken());
+  const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState("");
+  const bootstrapping = useRef(false);
 
-  const signup = useCallback(async (email, password) => {
-    const data = await apiSignup(email, password);
-    setToken(data.access_token);
-    setIsAuthenticated(true);
+  const bootstrapSession = useCallback(async () => {
+    if (bootstrapping.current) return;
+    bootstrapping.current = true;
+    try {
+      const data = await createAnonymousSession();
+      setToken(data.access_token);
+      setError("");
+    } catch {
+      setError("Couldn't start a session. Please refresh the page.");
+    } finally {
+      bootstrapping.current = false;
+      setIsReady(true);
+    }
   }, []);
 
-  const login = useCallback(async (email, password) => {
-    const data = await apiLogin(email, password);
-    setToken(data.access_token);
-    setIsAuthenticated(true);
-  }, []);
+  useEffect(() => {
+    if (getToken()) {
+      setIsReady(true);
+    } else {
+      bootstrapSession();
+    }
+  }, [bootstrapSession]);
 
-  const logout = useCallback(() => {
+  const resetSession = useCallback(async () => {
     clearToken();
-    setIsAuthenticated(false);
-  }, []);
+    setIsReady(false);
+    await bootstrapSession();
+  }, [bootstrapSession]);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, signup, login, logout }}>
+    <AuthContext.Provider value={{ isReady, error, resetSession }}>
       {children}
     </AuthContext.Provider>
   );

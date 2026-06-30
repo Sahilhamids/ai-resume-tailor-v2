@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import * as api from "../api";
 import ErrorBanner from "../components/ErrorBanner";
+import ScoreChart from "../components/ScoreChart";
 
 export default function Auditor() {
   const [file, setFile] = useState(null);
@@ -9,6 +10,7 @@ export default function Auditor() {
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [error, setError] = useState("");
+  const [isAuditing, setIsAuditing] = useState(false);
 
   async function loadHistory() {
     try {
@@ -24,6 +26,7 @@ export default function Auditor() {
     if (!file || !jd.trim() || !role.trim()) {
       return setError("File, role, and job description are all required.");
     }
+    setIsAuditing(true);
     try {
       const r = await api.auditResume(file, jd, role);
       setResult(r);
@@ -31,6 +34,8 @@ export default function Auditor() {
       await loadHistory();
     } catch (e) {
       setError(e.message);
+    } finally {
+      setIsAuditing(false);
     }
   }
 
@@ -40,10 +45,12 @@ export default function Auditor() {
 
       <div className="card">
         <h3>ATS Audit</h3>
-        <input type="file" accept=".pdf" onChange={(e) => setFile(e.target.files[0])} />
-        <input placeholder="Target Role Level (e.g. Mid-level SDE)" value={role} onChange={(e) => setRole(e.target.value)} />
-        <textarea rows={6} placeholder="Paste the job description here..." value={jd} onChange={(e) => setJd(e.target.value)} />
-        <button onClick={handleAudit}>Run Audit</button>
+        <input type="file" accept=".pdf" onChange={(e) => setFile(e.target.files[0])} disabled={isAuditing} />
+        <input placeholder="Target Role Level (e.g. Mid-level SDE)" value={role} onChange={(e) => setRole(e.target.value)} disabled={isAuditing} />
+        <textarea rows={6} placeholder="Paste the job description here..." value={jd} onChange={(e) => setJd(e.target.value)} disabled={isAuditing} />
+        <button onClick={handleAudit} disabled={isAuditing}>
+          {isAuditing ? "Running Audit…" : "Run Audit"}
+        </button>
       </div>
 
       {result && (
@@ -65,13 +72,7 @@ export default function Auditor() {
 
       <div className="card">
         <h3>Score History</h3>
-        {history.length === 0 && <p className="muted">No audits yet.</p>}
-        {history.map((h, i) => (
-          <div className="row" key={i}>
-            <span>{new Date(h.timestamp).toLocaleDateString()} - {h.target_role}</span>
-            <b>{h.score}</b>
-          </div>
-        ))}
+        <ScoreChart history={history} />
       </div>
     </div>
   );

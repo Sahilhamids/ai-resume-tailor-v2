@@ -1,8 +1,14 @@
-from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException
+import secrets
+import uuid
+
+from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 import database
 from db import init_db
@@ -13,7 +19,11 @@ from validator import validate_missing_keywords
 from ai_agent import analyze_resume, generate_tailored_resume, parse_resume_to_profile
 from pdf_generator import create_pdf_from_json
 
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI(title="Career Intelligence Platform")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.mount("/assets", StaticFiles(directory="static_dist/assets"), name="assets")
 
 
@@ -73,6 +83,18 @@ def root():
 
 # --- Auth ---
 
+@app.post("/auth/anonymous")
+@limiter.limit("10/minute")
+def create_anonymous_session(request: Request):
+    """Issues a session with no signup screen. Profile/history still persist per-browser via the JWT."""
+    email = f"anon-{uuid.uuid4()}@anon.local"
+    password = secrets.token_hex(16)
+    database.create_user(email, password)
+    user_id = database.verify_login(email, password)
+    token = create_access_token(user_id)
+    return {"access_token": token, "token_type": "bearer"}
+
+
 @app.post("/auth/signup")
 def signup(data: SignupRequest):
     ok = database.create_user(data.email, data.password)
@@ -117,7 +139,8 @@ def update_profile(data: ProfileUpdateRequest, user_id: int = Depends(get_curren
 
 
 @app.post("/profile/onboard-from-pdf")
-async def onboard_from_pdf(resume_file: UploadFile = File(...), user_id: int = Depends(get_current_user_id)):
+@limiter.limit("5/minute")
+async def onboard_from_pdf(request: Request, resume_file: UploadFile = File(...), user_id: int = Depends(get_current_user_id)):
     resume_text = extract_text_from_pdf(await resume_file.read())
     parsed = parse_resume_to_profile(resume_text)
 
@@ -212,7 +235,8 @@ def delete_custom_section(section_id: int, user_id: int = Depends(get_current_us
 # --- Pipeline 1: Build / tailor resume ---
 
 @app.post("/resume/build")
-def build_resume(data: BuildResumeRequest, user_id: int = Depends(get_current_user_id)):
+@limiter.limit("5/minute")
+def build_resume(request: Request, data: BuildResumeRequest, user_id: int = Depends(get_current_user_id)):
     profile = database.get_profile(user_id)
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
@@ -259,7 +283,9 @@ def export_pdf(tailored_resume: dict, user_id: int = Depends(get_current_user_id
 # --- Pipeline 2: ATS Audit ---
 
 @app.post("/resume/audit")
+@limiter.limit("5/minute")
 async def audit_resume(
+    request: Request,
     job_description: str = Form(...),
     role: str = Form(...),
     resume_file: UploadFile = File(...),

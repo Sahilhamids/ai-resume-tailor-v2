@@ -23,7 +23,10 @@ export async function api(path, options = {}) {
 
   if (res.status === 401) {
     clearToken();
-    throw new ApiError("Session expired, please log in again.");
+    throw new ApiError("Session expired. Refresh the page to start a new session.");
+  }
+  if (res.status === 429) {
+    throw new ApiError("Too many requests — please wait a moment and try again.");
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -32,6 +35,10 @@ export async function api(path, options = {}) {
 
   const contentType = res.headers.get("content-type") || "";
   return contentType.includes("application/json") ? res.json() : res;
+}
+
+export async function createAnonymousSession() {
+  return api("/auth/anonymous", { method: "POST" });
 }
 
 export async function signup(email, password) {

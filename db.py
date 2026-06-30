@@ -11,7 +11,8 @@ DATABASE_URL = os.getenv("DATABASE_URL", "").replace("postgresql://", "postgresq
 
 # Supabase's transaction pooler (port 6543) doesn't support server-side
 # prepared statements, so disable psycopg's prepared-statement cache.
-engine = create_engine(DATABASE_URL, pool_pre_ping=True, connect_args={"prepare_threshold": None})
+_connect_args = {"prepare_threshold": None} if DATABASE_URL.startswith("postgresql+psycopg://") else {}
+engine = create_engine(DATABASE_URL, pool_pre_ping=True, connect_args=_connect_args)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 Base = declarative_base()
 
