@@ -2,6 +2,8 @@
 
 > Living status doc for picking up this project in a new chat session. Update this whenever significant work lands.
 
+See also: [`STUDY_GUIDE.md`](STUDY_GUIDE.md) — a full end-to-end interview-prep explainer of every concept used in this project (FastAPI, JWT, SQLAlchemy, LLM fallback architecture, React, Docker, etc.), written so the user can defend this project on a resume/interview and rebuild something similar from scratch.
+
 ## Where things live
 
 - **Repo**: `C:\Users\ssahi\OneDrive\Desktop\JOB PREP\SDE_PROJECTS\AI_RESUME\resume_tailor_app` (note: NOT the `SDE PREP` path — that was a wrong-folder mistake early on, the real project is under `JOB PREP`)
