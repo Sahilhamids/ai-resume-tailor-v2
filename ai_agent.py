@@ -1,12 +1,14 @@
 import json
 import os
-import streamlit as st
+from dotenv import load_dotenv
 from google import genai
 from groq import Groq
 
+load_dotenv()
+
 # Access API keys
-gemini_key = st.secrets.get("API_KEY") # Your existing Gemini key
-groq_key = st.secrets.get("GROQ_API_KEY") 
+gemini_key = os.getenv("API_KEY") # Your existing Gemini key
+groq_key = os.getenv("GROQ_API_KEY")
 
 # Initialize Clients
 gemini_client = genai.Client(api_key=gemini_key)
@@ -170,7 +172,6 @@ def parse_resume_to_profile(resume_text):
     
     try:
         result_text = analyze_with_gemini(prompt)
-        import json # Ensure json is imported at the top of your file!
         return json.loads(result_text)
     except Exception as e:
         print(f"Gemini failed, falling back to Groq: {e}")
