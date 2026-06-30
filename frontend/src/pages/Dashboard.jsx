@@ -106,7 +106,7 @@ export default function Dashboard() {
         {profile.employment.map(([id, company, role, start, end]) => (
           <div className="row" key={id}>
             <span><b>{role}</b> @ {company} ({start} - {end})</span>
-            <button className="danger" onClick={() => handleAction(() => api.deleteEmployment(id))}>Remove</button>
+            <button className="danger" onClick={() => window.confirm(`Remove ${role} @ ${company}?`) && handleAction(() => api.deleteEmployment(id))}>Remove</button>
           </div>
         ))}
         <input placeholder="Company" value={emp.company} onChange={(e) => setEmp({ ...emp, company: e.target.value })} />
@@ -123,7 +123,7 @@ export default function Dashboard() {
         {profile.projects.map(([id, name, description]) => (
           <div className="row" key={id}>
             <span><b>{name}</b> - {description}</span>
-            <button className="danger" onClick={() => handleAction(() => api.deleteProject(id))}>Remove</button>
+            <button className="danger" onClick={() => window.confirm(`Remove project "${name}"?`) && handleAction(() => api.deleteProject(id))}>Remove</button>
           </div>
         ))}
         <input placeholder="Project Name" value={proj.name} onChange={(e) => setProj({ ...proj, name: e.target.value })} />

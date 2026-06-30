@@ -155,7 +155,7 @@ export default function Builder() {
             <span>{r.title} <span className="muted">({r.template}, {new Date(r.created_at).toLocaleDateString()})</span></span>
             <span>
               <button className="secondary" onClick={() => handleLoadSaved(r.id)}>Load</button>{" "}
-              <button className="danger" onClick={() => handleDeleteSaved(r.id)}>Delete</button>
+              <button className="danger" onClick={() => window.confirm(`Delete saved resume "${r.title}"?`) && handleDeleteSaved(r.id)}>Delete</button>
             </span>
           </div>
         ))}

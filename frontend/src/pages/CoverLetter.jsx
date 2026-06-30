@@ -85,7 +85,7 @@ export default function CoverLetter() {
         {letters.map((l) => (
           <div className="row" key={l.id}>
             <span>{l.title} {l.company_name && <span className="muted">— {l.company_name}</span>}</span>
-            <button className="danger" onClick={() => handleDelete(l.id)}>Delete</button>
+            <button className="danger" onClick={() => window.confirm(`Delete cover letter "${l.title}"?`) && handleDelete(l.id)}>Delete</button>
           </div>
         ))}
       </div>

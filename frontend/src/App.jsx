@@ -9,6 +9,12 @@ import JobTracker from "./pages/JobTracker";
 function Layout({ children }) {
   const { resetSession } = useAuth();
 
+  function handleResetSession() {
+    if (window.confirm("This permanently deletes your profile, saved resumes, cover letters, and job tracker data on this browser. Continue?")) {
+      resetSession();
+    }
+  }
+
   return (
     <div className="container">
       <h1>🚀 Career Intelligence Platform</h1>
@@ -18,7 +24,7 @@ function Layout({ children }) {
         <NavLink to="/auditor" className={({ isActive }) => (isActive ? "active" : "")}>Audit PDF</NavLink>
         <NavLink to="/cover-letter" className={({ isActive }) => (isActive ? "active" : "")}>Cover Letter</NavLink>
         <NavLink to="/jobs" className={({ isActive }) => (isActive ? "active" : "")}>Job Tracker</NavLink>
-        <button className="secondary" onClick={resetSession} title="Clears your saved profile/history and starts fresh">
+        <button className="secondary" onClick={handleResetSession} title="Permanently deletes your data on this browser and starts fresh">
           Start New Session
         </button>
       </nav>

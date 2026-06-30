@@ -75,7 +75,7 @@ export default function JobTracker() {
                 <select value={j.status} onChange={(e) => handleStatusChange(j.id, e.target.value)} style={{ marginTop: "6px" }}>
                   {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
                 </select>
-                <button className="danger" onClick={() => handleDelete(j.id)} style={{ marginTop: "6px", width: "100%" }}>
+                <button className="danger" onClick={() => window.confirm(`Delete application for ${j.role} @ ${j.company}?`) && handleDelete(j.id)} style={{ marginTop: "6px", width: "100%" }}>
                   Delete
                 </button>
               </div>

@@ -1,89 +1,59 @@
-🚀 Career Intelligence Platform (AI Resume SaaS)
+# 🚀 Career Intelligence Platform
 
-A full-stack, AI-powered Software-as-a-Service (SaaS) application designed to help job seekers beat the Applicant Tracking System (ATS).
+An AI-powered career toolkit: upload a resume or describe your background, tailor it to a specific job, audit it against an ATS, generate a cover letter, and track your applications — all with no signup required.
 
-Unlike basic AI wrappers, this platform features secure user authentication, a persistent relational database for managing career profiles, and strict, hallucination-free LLM prompt engineering to generate factual, copy-paste-ready resume content tailored to specific Job Descriptions.
+## Features
 
-Check it out here: https://ai-resume-tailor-v2.streamlit.app/
-✨ Key Features
+- **No login required** — an anonymous session is issued automatically; your profile and history persist per-browser.
+- **AI Onboarding** — upload an existing resume PDF and auto-fill your profile via Gemini/Groq.
+- **Resume Builder** — tailors your profile to a job description, with 3 visual templates (Modern/Classic/Minimal), a live preview, and PDF/DOCX export.
+- **Saved Resume Versions** — name and keep multiple tailored resumes for different roles.
+- **ATS Auditor** — scores a resume against a job description, flags missing keywords (fact-checked against the raw text to catch AI hallucinations), and tracks score history with before/after comparison.
+- **Cover Letter Generator** — strictly factual, generated from your saved profile data.
+- **Job Application Tracker** — a Kanban board (Applied → Interviewing → Offer → Rejected).
+- **Anti-hallucination prompting** — the AI is instructed never to invent metrics, employers, or skills not present in your data; a separate validator double-checks "missing keyword" claims against the raw resume text.
+- **High-availability LLM routing** — Gemini primary, Groq/Llama-3 fallback if the primary fails or rate-limits.
 
-🔐 Secure Authentication & User State: Implemented bcrypt password hashing and Streamlit session state to create a secure, gated multi-user environment.
+## Tech Stack
 
-💾 Persistent Relational Database: Engineered a full CRUD (Create, Read, Update, Delete) SQLite database to act as the user's "Master Profile," storing employment history, skills, projects, and custom sections securely.
+- **Backend:** FastAPI, SQLAlchemy, JWT auth (anonymous sessions)
+- **Frontend:** React + Vite, served as static files from the FastAPI app
+- **Database:** PostgreSQL (Supabase free tier)
+- **AI:** Google Gemini (primary), Groq/Llama-3 (fallback)
+- **Document processing:** PyMuPDF (PDF text extraction), xhtml2pdf (PDF export), python-docx (Word export)
+- **Deployment:** Docker, deployable free on Render
 
-🪄 AI Onboarding (Cold-Start Resolution): Users can upload an existing PDF resume, and the AI will extract, parse, and auto-populate the database using strict JSON schemas.
+## Local Development
 
-⚡ Pipeline 1 (Dynamic Builder): Cross-references the user's factual database profile with a target Job Description to generate highly optimized, tailored resume bullets. Strict system prompts prevent AI hallucinations (inventing metrics or fake jobs).
+1. Clone the repo and `cd resume_tailor_app`.
+2. Backend:
+   ```
+   python -m venv venv
+   venv\Scripts\activate   # or source venv/bin/activate on Linux/Mac
+   pip install -r requirements.txt
+   ```
+3. Frontend:
+   ```
+   cd frontend
+   npm install
+   npm run build
+   ```
+4. Create a `.env` file in the project root:
+   ```
+   API_KEY=your_gemini_key
+   GROQ_API_KEY=your_groq_key
+   DATABASE_URL=postgresql://...
+   JWT_SECRET=a_random_secret
+   ```
+5. Run the app:
+   ```
+   uvicorn main:app --reload
+   ```
 
-🔍 Pipeline 2 (ATS Auditor): Extracts and sanitizes text from uploaded PDFs, scores it against a Job Description, performs keyword gap analysis, and tracks the user's score progression over time via a historical database.
+## Deployment
 
-🔀 High-Availability LLM Architecture: Implemented an API fallback cascade. If the primary model (Google Gemini) fails or rate-limits, the system automatically seamlessly cascades to a secondary high-speed model (Llama-3.1 via Groq).
+The included `Dockerfile` builds the React frontend and Python backend into a single image (multi-stage build), and `render.yaml` configures it for Render's free web service tier. Set `API_KEY`, `GROQ_API_KEY`, `DATABASE_URL`, and `JWT_SECRET` as environment variables in the Render dashboard — never commit them.
 
-🎨 Modern UI/UX: Custom CSS injection overrides default Streamlit styling to provide a sleek, dark-mode SaaS aesthetic with glassmorphic containers, an animated gradient background, real-time weather, and visitor tracking widgets.
+⚠️ Don't commit `.env`, `*.db` files, or any API keys — `.gitignore` already covers these.
 
-🛠️ Tech Stack
-
-Frontend: Streamlit, Custom CSS, HTML
-
-Backend: Python
-
-Database: SQLite3, Pandas (for data visualization)
-
-AI / LLMs: Google Gemini API (Primary), Groq API / Llama-3.1 (Fallback)
-
-Document Processing: PyMuPDF (fitz)
-
-Security & Utilities: bcrypt, requests, datetime
-
-🏗️ System Architecture
-
-app.py: The main routing engine and UI layer. Manages session state, authentication UI, global modern CSS, and multi-page navigation.
-
-database.py: Handles all SQLite connections, user creation, password verification, and complex CRUD operations for user profiles and audit histories.
-
-ai_agent.py: The AI engine. Manages API connections, fallback logic, and strict JSON-enforced prompt engineering.
-
-extractor.py & sanitizer.py: Text processing layer ensuring raw PDFs are cleaned of hidden characters and ligatures before being sent to the LLM context window.
-
-validator.py: A deterministic regex engine that double-checks the AI's keyword analysis to prevent "AI False Alarms."
-
-💻 Installation & Local Setup
-
-1. Clone the repository
-
-git clone [https://github.com/Sahilhamids/ai-resume-tailor-v2.git](https://github.com/yourusername/career-intelligence-platform.git)
-cd career-intelligence-platform
-
-
-2. Create a virtual environment and install dependencies
-
-python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-pip install -r requirements.txt
-
-
-3. Configure API Secrets
-Create a .streamlit folder in the root directory, and inside it, create a secrets.toml file. Add your API keys:
-
-API_KEY = "your_google_gemini_key_here"
-GROQ_API_KEY = "your_groq_key_here"
-
-
-4. Run the application
-
-streamlit run app.py
-
-
-⚠️ Important Note on Deployment
-
-If deploying to Streamlit Community Cloud or Render, ensure you do not commit your .streamlit/secrets.toml file or your .db SQLite files. Use a .gitignore file to keep them private.
-
-📈 Future Roadmap
-
-Integration with a FastAPI backend for decoupling the UI.
-
-PDF generation (exporting the tailored text directly into a formatted PDF layout).
-
-LinkedIn URL scraping to auto-populate the master profile without a PDF.
-
-Developed by SAHIL SHAIKH
+Developed by Sahil Shaikh
