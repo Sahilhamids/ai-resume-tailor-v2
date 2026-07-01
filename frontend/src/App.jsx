@@ -7,7 +7,6 @@ import Builder from "./pages/Builder";
 import Auditor from "./pages/Auditor";
 import CoverLetter from "./pages/CoverLetter";
 import JobTracker from "./pages/JobTracker";
-import Account from "./pages/Account";
 import About from "./pages/About";
 
 function Layout({ children }) {
@@ -20,7 +19,6 @@ function Layout({ children }) {
         <NavLink to="/auditor" className={({ isActive }) => (isActive ? "active" : "")}>Audit PDF</NavLink>
         <NavLink to="/cover-letter" className={({ isActive }) => (isActive ? "active" : "")}>Cover Letter</NavLink>
         <NavLink to="/jobs" className={({ isActive }) => (isActive ? "active" : "")}>Job Tracker</NavLink>
-        <NavLink to="/account" className={({ isActive }) => (isActive ? "active" : "")}>Account</NavLink>
         <NavLink to="/about" className={({ isActive }) => (isActive ? "active" : "")}>About</NavLink>
         <ThemeSwitcher />
       </nav>
@@ -48,7 +46,6 @@ function AppRoutes() {
       <Route path="/auditor" element={<Layout><Auditor /></Layout>} />
       <Route path="/cover-letter" element={<Layout><CoverLetter /></Layout>} />
       <Route path="/jobs" element={<Layout><JobTracker /></Layout>} />
-      <Route path="/account" element={<Layout><Account /></Layout>} />
       <Route path="/about" element={<Layout><About /></Layout>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

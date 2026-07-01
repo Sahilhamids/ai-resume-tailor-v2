@@ -2,6 +2,41 @@ import { useEffect, useState } from "react";
 import * as api from "../api";
 import ErrorBanner from "../components/ErrorBanner";
 
+const BUILD_STEPS = [
+  "Reading your profile and work history…",
+  "Analysing the job description for key requirements…",
+  "Matching your experience to the role…",
+  "Rewriting bullet points to highlight the best fit…",
+  "Formatting the final resume…",
+];
+
+const AUDIT_STEPS = [
+  "Extracting text from your PDF…",
+  "Scrubbing personal details before sending to AI…",
+  "Checking how well your resume matches the job description…",
+  "Scoring keywords and identifying gaps…",
+  "Verifying the AI's keyword claims against your actual resume…",
+  "Preparing your results…",
+];
+
+function useStepProgress(steps, active) {
+  const [stepIndex, setStepIndex] = useState(0);
+
+  useEffect(() => {
+    if (!active) { setStepIndex(0); return; }
+    setStepIndex(0);
+    let i = 0;
+    const interval = setInterval(() => {
+      i += 1;
+      if (i < steps.length - 1) setStepIndex(i);
+      else clearInterval(interval);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, [active]);
+
+  return steps[stepIndex];
+}
+
 export default function Builder() {
   const [jd, setJd] = useState("");
   const [result, setResult] = useState(null);
@@ -15,6 +50,8 @@ export default function Builder() {
   const [saveTitle, setSaveTitle] = useState("");
   const [saved, setSaved] = useState(false);
   const [savedResumes, setSavedResumes] = useState([]);
+
+  const buildStatus = useStepProgress(BUILD_STEPS, isBuilding);
 
   function loadSavedResumes() {
     api.listSavedResumes().then(setSavedResumes).catch((e) => setError(e.message));
@@ -108,8 +145,13 @@ export default function Builder() {
         <h3>Build a Tailored Resume</h3>
         <textarea rows={6} placeholder="Paste the job description here..." value={jd} onChange={(e) => setJd(e.target.value)} disabled={isBuilding} />
         <button onClick={handleBuild} disabled={isBuilding}>
-          {isBuilding ? "Generating…" : "Generate Tailored Resume"}
+          {isBuilding ? "Working…" : "Generate Tailored Resume"}
         </button>
+        {isBuilding && (
+          <p className="muted" style={{ marginTop: "10px", fontStyle: "italic" }}>
+            ⏳ {buildStatus}
+          </p>
+        )}
       </div>
 
       {result && (
