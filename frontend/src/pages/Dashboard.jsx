@@ -8,6 +8,7 @@ export default function Dashboard() {
   const [form, setForm] = useState({ full_name: "", phone: "", linkedin: "", github: "", target_role: "" });
   const [newSkill, setNewSkill] = useState("");
   const [emp, setEmp] = useState({ company: "", role: "", start_date: "", end_date: "", responsibilities: "" });
+  const [edu, setEdu] = useState({ institution: "", degree: "", field_of_study: "", start_year: "", end_year: "", grade: "" });
   const [proj, setProj] = useState({ name: "", description: "", link: "" });
   const [isOnboarding, setIsOnboarding] = useState(false);
 
@@ -52,7 +53,7 @@ export default function Dashboard() {
 
   if (!profile) return <ErrorBanner message={error} />;
 
-  const isFirstTime = !profile.full_name && profile.skills.length === 0 && profile.employment.length === 0 && profile.projects.length === 0;
+  const isFirstTime = !profile.full_name && profile.skills.length === 0 && profile.employment.length === 0 && profile.education.length === 0 && profile.projects.length === 0;
 
   return (
     <div>
@@ -115,6 +116,24 @@ export default function Dashboard() {
         <input placeholder="End Date" value={emp.end_date} onChange={(e) => setEmp({ ...emp, end_date: e.target.value })} />
         <textarea placeholder="Responsibilities" value={emp.responsibilities} onChange={(e) => setEmp({ ...emp, responsibilities: e.target.value })} />
         <button onClick={() => handleAction(async () => { await api.addEmployment(emp); setEmp({ company: "", role: "", start_date: "", end_date: "", responsibilities: "" }); })}>Add Job</button>
+      </div>
+
+      <div className="card">
+        <h3>Education</h3>
+        {profile.education.length === 0 && <p className="muted">No education entries yet.</p>}
+        {profile.education.map(([id, institution, degree, field, startYear, endYear, grade]) => (
+          <div className="row" key={id}>
+            <span><b>{degree}{field ? ` in ${field}` : ""}</b> — {institution}{startYear ? ` (${startYear}–${endYear || "present"})` : ""}{grade ? `, ${grade}` : ""}</span>
+            <button className="danger" onClick={() => window.confirm(`Remove ${institution}?`) && handleAction(() => api.deleteEducation(id))}>Remove</button>
+          </div>
+        ))}
+        <input placeholder="Institution / University" value={edu.institution} onChange={(e) => setEdu({ ...edu, institution: e.target.value })} />
+        <input placeholder="Degree (e.g. B.Tech, M.Sc)" value={edu.degree} onChange={(e) => setEdu({ ...edu, degree: e.target.value })} />
+        <input placeholder="Field of Study (e.g. Computer Science)" value={edu.field_of_study} onChange={(e) => setEdu({ ...edu, field_of_study: e.target.value })} />
+        <input placeholder="Start Year" value={edu.start_year} onChange={(e) => setEdu({ ...edu, start_year: e.target.value })} />
+        <input placeholder="End Year (or expected)" value={edu.end_year} onChange={(e) => setEdu({ ...edu, end_year: e.target.value })} />
+        <input placeholder="Grade / GPA / Percentage (optional)" value={edu.grade} onChange={(e) => setEdu({ ...edu, grade: e.target.value })} />
+        <button onClick={() => handleAction(async () => { await api.addEducation(edu); setEdu({ institution: "", degree: "", field_of_study: "", start_year: "", end_year: "", grade: "" }); })}>Add Education</button>
       </div>
 
       <div className="card">

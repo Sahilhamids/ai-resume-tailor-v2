@@ -27,6 +27,7 @@ class User(Base):
 
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     employment_history = relationship("EmploymentHistory", back_populates="user", cascade="all, delete-orphan")
+    education = relationship("Education", back_populates="user", cascade="all, delete-orphan")
     skills = relationship("Skill", back_populates="user", cascade="all, delete-orphan")
     projects = relationship("Project", back_populates="user", cascade="all, delete-orphan")
     custom_sections = relationship("CustomSection", back_populates="user", cascade="all, delete-orphan")
@@ -61,6 +62,21 @@ class EmploymentHistory(Base):
     responsibilities = Column(Text)
 
     user = relationship("User", back_populates="employment_history")
+
+
+class Education(Base):
+    __tablename__ = "education"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    institution = Column(String, nullable=False)
+    degree = Column(String)
+    field_of_study = Column(String)
+    start_year = Column(String)
+    end_year = Column(String)
+    grade = Column(String)
+
+    user = relationship("User", back_populates="education")
 
 
 class Skill(Base):

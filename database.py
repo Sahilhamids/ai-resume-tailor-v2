@@ -2,7 +2,7 @@ import bcrypt
 from datetime import datetime
 
 from db import (
-    get_session, User, Profile, EmploymentHistory, Skill, Project, CustomSection, Audit,
+    get_session, User, Profile, EmploymentHistory, Education, Skill, Project, CustomSection, Audit,
     SavedResume, CoverLetter, JobApplication, UsageEvent,
 )
 
@@ -150,6 +150,38 @@ def add_employment(user_id, company, role, start_date, end_date, responsibilitie
             user_id=user_id, company_name=company, role_title=role,
             start_date=start_date, end_date=end_date, responsibilities=responsibilities,
         ))
+        session.commit()
+    finally:
+        session.close()
+
+
+# --- EDUCATION CRUD ---
+
+def get_education(user_id):
+    session = get_session()
+    try:
+        rows = session.query(Education).filter(Education.user_id == user_id).all()
+        return [(e.id, e.institution, e.degree, e.field_of_study, e.start_year, e.end_year, e.grade) for e in rows]
+    finally:
+        session.close()
+
+
+def add_education(user_id, institution, degree, field_of_study, start_year, end_year, grade):
+    session = get_session()
+    try:
+        session.add(Education(
+            user_id=user_id, institution=institution, degree=degree,
+            field_of_study=field_of_study, start_year=start_year, end_year=end_year, grade=grade,
+        ))
+        session.commit()
+    finally:
+        session.close()
+
+
+def delete_education(edu_id):
+    session = get_session()
+    try:
+        session.query(Education).filter(Education.id == edu_id).delete()
         session.commit()
     finally:
         session.close()

@@ -78,6 +78,15 @@ class CustomSectionRequest(BaseModel):
     content: str
 
 
+class EducationRequest(BaseModel):
+    institution: str
+    degree: str = ""
+    field_of_study: str = ""
+    start_year: str = ""
+    end_year: str = ""
+    grade: str = ""
+
+
 class BuildResumeRequest(BaseModel):
     job_description: str
 
@@ -235,6 +244,7 @@ def get_profile(user_id: int = Depends(get_current_user_id)):
         "github": github, "target_role": target_role,
         "skills": database.get_skills(user_id),
         "employment": database.get_employment(user_id),
+        "education": database.get_education(user_id),
         "projects": database.get_projects(user_id),
         "custom_sections": database.get_custom_sections(user_id),
     }
@@ -319,6 +329,18 @@ def update_project(project_id: int, data: ProjectRequest, user_id: int = Depends
 @app.delete("/profile/projects/{project_id}")
 def delete_project(project_id: int, user_id: int = Depends(get_current_user_id)):
     database.delete_project(project_id)
+    return {"status": "ok"}
+
+
+@app.post("/profile/education")
+def add_education(data: EducationRequest, user_id: int = Depends(get_current_user_id)):
+    database.add_education(user_id, data.institution, data.degree, data.field_of_study, data.start_year, data.end_year, data.grade)
+    return {"status": "ok"}
+
+
+@app.delete("/profile/education/{edu_id}")
+def delete_education(edu_id: int, user_id: int = Depends(get_current_user_id)):
+    database.delete_education(edu_id)
     return {"status": "ok"}
 
 

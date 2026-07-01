@@ -114,6 +114,18 @@ export async function deleteEmployment(id) {
   return api(`/profile/employment/${id}`, { method: "DELETE" });
 }
 
+export async function addEducation(data) {
+  return api("/profile/education", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteEducation(id) {
+  return api(`/profile/education/${id}`, { method: "DELETE" });
+}
+
 export async function addProject(data) {
   return api("/profile/projects", {
     method: "POST",
