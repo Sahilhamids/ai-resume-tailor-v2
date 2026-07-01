@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import date
 from dotenv import load_dotenv
 from google import genai
 from groq import Groq
@@ -13,6 +14,9 @@ groq_key = os.getenv("GROQ_API_KEY")
 # Initialize Clients
 gemini_client = genai.Client(api_key=gemini_key)
 groq_client = Groq(api_key=groq_key)
+
+def _today() -> str:
+    return date.today().strftime("%B %d, %Y")  # e.g. "July 01, 2026"
 
 def clean_json_string(text):
     """Helper function to strip markdown from LLM outputs."""
@@ -38,6 +42,8 @@ def analyze_with_groq(prompt):
 
 def analyze_resume(resume_text, job_description, role_level):
     prompt = f"""
+    Today's date is {_today()}. Treat any dates up to and including today as valid — do not flag them as future dates.
+
     Act as a professional Career Coach and ATS Expert.
     Analyze the following resume against the job description for a {role_level} position.
     
@@ -80,6 +86,8 @@ def generate_tailored_resume(profile_data, job_description):
     strict, tailored resume content without hallucinating.
     """
     prompt = f"""
+    Today's date is {_today()}. Treat any dates up to and including today as valid — do not flag them as future dates.
+
     Act as an Expert Executive Resume Writer and ATS Specialist.
     Your task is to generate highly tailored, ATS-friendly resume sections based STRICTLY on the user's provided profile data and the target Job Description.
 
@@ -135,6 +143,8 @@ def parse_resume_to_profile(resume_text):
     that perfectly matches our database schema.
     """
     prompt = f"""
+    Today's date is {_today()}. Treat any dates up to and including today as valid — do not flag them as future dates.
+
     Act as an Expert Data Extraction AI. Extract the candidate's professional profile from the following resume text.
     Return ONLY a single valid JSON object. Do not invent any data. If a field is missing, return an empty string "" or an empty list [].
 
@@ -185,6 +195,8 @@ def generate_cover_letter(profile_data, job_description, company_name):
     following the same anti-hallucination rules as the resume builder.
     """
     prompt = f"""
+    Today's date is {_today()}. Treat any dates up to and including today as valid — do not flag them as future dates.
+
     Act as an Expert Career Coach writing a compelling, concise cover letter.
     Use STRICTLY the facts in the User Profile Data below — do not invent
     metrics, companies, or skills not present there. Address the letter to
