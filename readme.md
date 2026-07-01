@@ -1,5 +1,7 @@
 # 🚀 Career Intelligence Platform
 
+**Live demo: [https://ai-resume-tailor-v2.onrender.com/dashboard](https://ai-resume-tailor-v2.onrender.com/dashboard)**
+
 An AI-powered career toolkit: upload a resume or describe your background, tailor it to a specific job, audit it against an ATS, generate a cover letter, and track your applications — all with no signup required.
 
 ## Features

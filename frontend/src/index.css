@@ -1,12 +1,43 @@
+/* Default theme: dark mode + indigo accent */
 :root {
   --primary: #6366f1;
+  --primary-text: #ffffff;
   --bg: #0f172a;
   --card-bg: #1e293b;
+  --input-bg: #0f172a;
   --text: #f8fafc;
   --muted: #94a3b8;
   --danger: #ef4444;
+  --success: #22c55e;
   --border: #334155;
 }
+
+/* --- Mode overrides --- */
+
+[data-mode="light"] {
+  --bg: #f8fafc;
+  --card-bg: #ffffff;
+  --input-bg: #f1f5f9;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+}
+
+[data-mode="night"] {
+  --bg: #000000;
+  --card-bg: #0a0a0a;
+  --input-bg: #050505;
+  --text: #e5e5e5;
+  --muted: #888888;
+  --border: #1f1f1f;
+}
+
+/* --- Accent overrides (apply on top of any mode) --- */
+
+[data-accent="blue"] { --primary: #3b82f6; }
+[data-accent="green"] { --primary: #22c55e; }
+[data-accent="rose"] { --primary: #f43f5e; }
+[data-accent="amber"] { --primary: #f59e0b; }
 
 * { box-sizing: border-box; }
 
@@ -15,6 +46,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--text);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 #root {
@@ -36,7 +68,8 @@ h1, h2, h3 { margin-top: 0; }
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border);
 }
 
 input, textarea, select {
@@ -45,14 +78,14 @@ input, textarea, select {
   margin: 6px 0;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: #0f172a;
+  background: var(--input-bg);
   color: var(--text);
   font-size: 14px;
 }
 
 button {
   background: var(--primary);
-  color: white;
+  color: var(--primary-text);
   border: none;
   padding: 10px 18px;
   border-radius: 8px;
@@ -63,9 +96,12 @@ button {
 
 button:hover { opacity: 0.9; }
 
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
 button.secondary {
   background: transparent;
   border: 1px solid var(--primary);
+  color: var(--primary);
 }
 
 button.danger {
@@ -74,6 +110,7 @@ button.danger {
 
 nav {
   display: flex;
+  align-items: center;
   gap: 12px;
   margin-bottom: 20px;
   flex-wrap: wrap;
@@ -87,10 +124,13 @@ nav a, nav button {
   align-items: center;
   padding: 10px 18px;
   border-radius: 8px;
+  border: 1px solid var(--border);
 }
 
 nav a.active {
   background: var(--primary);
+  color: var(--primary-text);
+  border-color: var(--primary);
 }
 
 .row {
@@ -113,7 +153,38 @@ ul { padding-left: 18px; }
 
 .error-banner {
   background: var(--danger);
+  color: #ffffff;
   padding: 10px;
   border-radius: 8px;
   margin-bottom: 12px;
+}
+
+/* --- Theme switcher --- */
+
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.theme-switcher select {
+  width: auto;
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.accent-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+.accent-dot.active {
+  border-color: var(--text);
 }
