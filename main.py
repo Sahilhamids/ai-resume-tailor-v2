@@ -168,6 +168,11 @@ def build_resume_json_data(user_id, tailored_resume):
 
 # --- Frontend ---
 
+@app.get("/health")
+def health():
+    return {"ok": True}
+
+
 @app.get("/", response_class=HTMLResponse)
 def root():
     return FileResponse("static_dist/index.html")
